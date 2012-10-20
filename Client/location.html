@@ -1,0 +1,71 @@
+﻿<!doctype html>
+<html lang="us">
+	<meta charset="utf-8">
+	<head>
+		<link rel="stylesheet" type="text/css" href="./css/style.css" />
+		<link href="css/dot-luv/jquery-ui-1.9.0.custom.css" rel="stylesheet">
+		<script src="js/jquery-1.8.2.js"></script>
+		<script src="js/jquery-ui-1.9.0.custom.js"></script>
+		<script>
+			function movieDialog(str) {
+				var getElementId = str.id;
+				$( "#dialog" ).dialog({
+					autoOpen: false,
+					width: 1070
+				});
+			
+				$( "#dialog" ).dialog( "open" );
+				event.preventDefault();
+				$("#movie_src").attr("src", $(str).attr("value"));
+				document.getElementById("a_video").load();
+				document.getElementById("a_video").play();
+
+				$("#a_video").bind('ended', function(){
+					setTimeout('dialogClose()', 5000);
+				});
+			};
+
+			function dialogClose() {
+				$( "#dialog" ).dialog( "close" );
+			}
+		</script>
+</head>
+
+<body>
+	<div class="container">
+		<div class="mainTitle">
+			<div class="backButton"><a href="second.html"><img src="./res/button_back.png" /></a></div>
+		</div>
+		<div class="containerMain">
+			<div class="locationMenu menuShadow" onClick="movieDialog(this)" id="dialog-link" value="./movie/Sequence_02.mp4">
+				산업공학과 사무실</div>
+			<div class="locationEmpty">&nbsp;</div>
+			<div class="locationMenu menuShadow" onClick="movieDialog(this)" id="dialog-link2" value="./movie/Sequence_01.mp4">
+				전자공학과 사무실</div>
+			<div class="locationEmpty">&nbsp;</div>
+			<div class="locationMenu menuShadow" onClick="movieDialog(this)" id="dialog-link3" value="./movie/Sequence_03.mp4">
+				학장실</div>
+			<div class="locationEmpty">&nbsp;</div>
+			<div class="locationMenu menuShadow" onClick="movieDialog(this)" id="dialog-link4" value="./movie/Sequence_04.mp4">
+				공학대학 교학과</div>
+			<div class="locationEmpty">&nbsp;</div>
+			<div class="locationMenu menuShadow" onClick="movieDialog(this)" id="dialog-link5" value="./movie/Sequence_05.mp4">
+				공학교육혁신센터(연구기획팀)</div>
+			<div class="both">&nbsp;</div>
+
+			<div class="locationMenu menuShadow" onClick="movieDialog(this)" id="dialog-link6" value="./movie/Sequence_06.mp4">
+				공학교육혁신센터(행정지원팀)</div>
+			<div class="locationEmpty">&nbsp;</div>
+			<div class="locationMenu menuShadow" onClick="movieDialog(this)" id="dialog-link7" value="./movie/Sequence_07.mp4">
+				컴퓨터과학전공설계Lab실</div>
+		</div>
+		<div class="mainBottom">&nbsp;</div>
+	</div>
+	
+	<div id="dialog">
+		<video controls="controls" width="1024" id="a_video">
+			<source id="movie_src" type="video/mp4"/>
+		</video>
+	</div>
+</body>
+</html>
