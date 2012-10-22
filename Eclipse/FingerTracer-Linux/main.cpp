@@ -75,6 +75,7 @@ typedef struct cam_params{
 	Mat result_frame;
 	Mat background;
 	GpuMat gpuFrame;
+	Mat beforeFrame;
 }cam_params;
 
 typedef struct detect_params{
@@ -138,6 +139,7 @@ int main(){
 		cam_param[i].cam_num = i;
 		cam_thr_id[i] = pthread_create(&cam_thread[i], NULL, cam_thread_body, (void *)&cam_param[i]);
 		sleep(1);
+		cam_param[i].frame.copyTo(cam_param[i].beforeFrame);
 	}
 
 
@@ -530,7 +532,7 @@ void detectAndDraw(cam_params& cam, double scale, detect_params* params, int par
 
 	//	Mat& img = param->cam_param->frame;
 
-	GpuMat img, bgImg, blurImg;
+	GpuMat img, bgImg, blurImg, beforeImg;
 	GpuMat faceBuf[CAM_NUM * DETECT_NUM];
 	Mat faces_downloaded[CAM_NUM * DETECT_NUM];
 	Mat& result_img = cam.result_frame;
@@ -561,7 +563,8 @@ void detectAndDraw(cam_params& cam, double scale, detect_params* params, int par
 	 */
 
 	img.upload(cam.frame);
-	bgImg.upload(cam.background);
+//	bgImg.upload(cam.background);
+	beforeImg.upload(cam.beforeFrame);
 
 	cout << img.type() << endl;
 
@@ -569,12 +572,13 @@ void detectAndDraw(cam_params& cam, double scale, detect_params* params, int par
 
 	//equalizeHist(img , img);
 
-	//	GaussianBlur(bgImg, bgImg, Size(1, 1), 0, 0);
-	//	GaussianBlur(img, img, Size(1, 1), 0, 0);
+//	GaussianBlur(bgImg, bgImg, Size(1, 1), 0, 0);
+//	GaussianBlur(img, img, Size(1, 1), 0, 0);
 
 	img.download(result_img);
 
-	extSubtract(img, bgImg, subImg);
+//	extSubtract(img, bgImg, subImg);
+	extSubtract(img, beforeImg, subImg);
 
 
 	cvtColor(subImg, gray, CV_BGR2GRAY);
@@ -638,5 +642,6 @@ void detectAndDraw(cam_params& cam, double scale, detect_params* params, int par
 		params[i].x = maxX;
 		params[i].y = maxY;
 	}
+	cam.frame.copyTo(cam.beforeFrame);
 	//	cv::imshow(resultName, img );
 }
