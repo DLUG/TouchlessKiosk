@@ -1,647 +1,233 @@
-#define CAM_NUM 2
-#define DETECT_NUM 3
-#define TRUE 1
-#define FALSE 1
-#define DEBUG
-#define DEBUG_SCREEN
-#define CAM_BRIGHT 0.5
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/objdetect/objdetect.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/gpu/gpu.hpp>
-#include <pthread.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-
-#include <iostream>
-
-using namespace std;
-using namespace cv;
-using namespace cv::gpu;
-
-Mat background[CAM_NUM];
-
-// HaarCascade 경로명 지정
-const String haarcascade[] = {
-		//		"/usr/share/opencv/haarcascades/haarcascade_frontalface_alt_tree.xml",
-		"/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml",
-//		"/usr/local/share/OpenCV/lbpcascades/lbpcascade_frontalface.xml",
-		"bottom2.xml",
-		"rockdata.xml"
-};
-
-// DebugScreen 원 색 지정
-#ifdef DEBUG_SCREEN
-const static Scalar colors[3][8] =  {
-		{
-				CV_RGB(32, 0, 255),
-				CV_RGB(64, 0, 255),
-				CV_RGB(96, 0, 255),
-				CV_RGB(128, 0, 255),
-				CV_RGB(160, 0, 255),
-				CV_RGB(192, 0, 255),
-				CV_RGB(224, 0, 255),
-				CV_RGB(255, 0, 255),
-		},
-		{
-				CV_RGB(32, 255, 0),
-				CV_RGB(64, 255, 0),
-				CV_RGB(96, 255, 0),
-				CV_RGB(128, 255, 0),
-				CV_RGB(160, 255, 0),
-				CV_RGB(192, 255, 0),
-				CV_RGB(224, 255, 0),
-				CV_RGB(255, 255, 0),
-		},
-		{
-				CV_RGB(255, 0, 32),
-				CV_RGB(255, 0, 64),
-				CV_RGB(255, 0, 96),
-				CV_RGB(255, 0, 128),
-				CV_RGB(255, 0, 160),
-				CV_RGB(255, 0, 192),
-				CV_RGB(255, 0, 224),
-				CV_RGB(255, 0, 255),
-		},
-};
-#endif
-
-
-typedef struct cam_params{
-	int cam_num;
-	Mat frame;
-	Mat result_frame;
-	Mat background;
-	GpuMat gpuFrame;
-	Mat beforeFrame;
-}cam_params;
-
-typedef struct detect_params{
-	int x;
-	int y;
-	int weight;
-	int height;
-	CascadeClassifier_GPU cascade;
-
-	cam_params* cam_param;
-}detect_params;
-
-typedef struct calc_object{
-	int x;
-	int y;
-	int z;
-} calc_object;
-
-void detectAndDraw(cam_params& cam, double scale, detect_params* params, int params_cnt);
-
-void* cam_thread_body (void* data);
-
-void callbackButton(int val, void* data){
-
-}
-
+#include "main.hpp"
 
 int main(){
-	int detect_thr_id[CAM_NUM * DETECT_NUM];
-	int cam_thr_id[CAM_NUM];
-	pthread_t cam_thread[CAM_NUM];
-	pthread_t detect_thread[DETECT_NUM];
-	int status;
-	int i, j;
-	int detect_cnt = 0;
+	int i, j, k;
+	bool detectSwitch = false;
 
-	Display *dpy = XOpenDisplay(NULL);
-	Display *dpy2 = XOpenDisplay(NULL);
+	Mat orig_img[CAM_NUM];
+	Mat rotate_img[CAM_NUM];
+	Mat bgremoved_img[CAM_NUM];
+	Mat before_img[CAM_NUM];
+	Mat bg_img[CAM_NUM];
+	Mat dst_img[CAM_NUM];
+	Mat blur_img[CAM_NUM];
 
-	char tmpChar[10];
+	GpuMat orig_img_gpu[CAM_NUM];
+	GpuMat rotate_img_gpu[CAM_NUM];
+	GpuMat before_img_gpu[CAM_NUM];
+	GpuMat bg_img_gpu[CAM_NUM];
+	GpuMat bgremoved_img_gpu[CAM_NUM];
 
-	double scale = 2;
+	VideoCapture cam[CAM_NUM];
 
-	int blackColor = BlackPixel(dpy, DefaultScreen(dpy));
-	Window w = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, 200, 100, 0, blackColor, blackColor);
+	object_gpu_t captured_objects[CAM_NUM];
+	real_object_t real_objects[2];
 
+	int judgement[30];
+	int judgement_score = 0;
+	int click_status[2] = {0, 0};
 
-	cam_params cam_param[CAM_NUM];
-	detect_params detect_param[CAM_NUM][DETECT_NUM];
+	for(i = 0; i < 30; i++){
+		judgement[i] = 0;
+	}
 
+	for(i = 0; i < 2; i++){
+		real_objects[i].x = 0;
+		real_objects[i].y = 0;
+		real_objects[i].z = 0;
+	}
+	real_objects[0].z = 1000;
 
-	IplImage* iplImg[CAM_NUM];
-	CvCapture* capture;
-	Mat tmpBackground;
-	Mat tmpBackground2;
-	calc_object calc_objects[DETECT_NUM];
-
-	cout << "Open Cams" << endl;
+	mouse_handler mouse_handler_object;
 
 	for(i = 0; i < CAM_NUM; i++){
-		cam_param[i].cam_num = i;
-		cam_thr_id[i] = pthread_create(&cam_thread[i], NULL, cam_thread_body, (void *)&cam_param[i]);
+		if(!cam[i].open(i)){
+			cerr << "Cannot Open Cam" << i << endl;
+			return -1;
+		} else {
+			cam[i].set(CV_CAP_PROP_BRIGHTNESS, CAM_BRIGHT[i]);
+			cam[i].set(CV_CAP_PROP_GAIN, 0);
+			cam[i].set(CV_CAP_PROP_EXPOSURE, 1);
+			if(i == 2){
+				cam[i].set(CV_CAP_PROP_FRAME_WIDTH, 640);
+				cam[i].set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+			} else {
+				cam[i].set(CV_CAP_PROP_FRAME_WIDTH, CAM_WIDTH);
+				cam[i].set(CV_CAP_PROP_FRAME_HEIGHT, CAM_HEIGHT);
+			}
+
+
+			char resultWinName[8] = "webcam";
+			resultWinName[6] = 48 + i;
+			resultWinName[7] = 0;
+
+			char maskWinName[6] = "mask";
+			maskWinName[4] = 48 + i;
+			maskWinName[5] = 0;
+
+			cvNamedWindow(resultWinName, 1);
+			cvNamedWindow(maskWinName, 1);
+		}
 		sleep(1);
-		cam_param[i].frame.copyTo(cam_param[i].beforeFrame);
 	}
 
+	char resultWinName[8] = "webcam";
+	resultWinName[6] = 48 + i;
+	resultWinName[7] = 0;
 
-	cout << "startDetect" << endl;
+	char maskWinName[6] = "mask";
+	maskWinName[4] = 48 + i;
+	maskWinName[5] = 0;
 
-	for(i = 0; i < DETECT_NUM; i++){
-		for(j = 0; j < CAM_NUM; j++){
-			detect_param[j][i].x = 0;
-			detect_param[j][i].y = 0;
-			detect_param[j][i].cam_param = &cam_param[j];
+	int keyCode;
 
-			if(!detect_param[j][i].cascade.load(haarcascade[i])){
-				cerr << "ERROR: Could not load classifier cascade" << endl;
-				return -1;
-			}
-		}
+	for(i = 0; i < CAM_NUM; i++){
+		captured_objects[i].width = 0;
+		captured_objects[i].height = 0;
+		captured_objects[i].x = 0;
+		captured_objects[i].y = 0;
+		captured_objects[i].cascade.load(HAAR_DATA[i]);
 	}
 
-	/*
-	cvNamedWindow("control", CV_WINDOW_NORMAL);
-	char* button = "button1";
-	createButton(button, callbackButton);
-	 */
-
-
-	int beforeX[DETECT_NUM];
-	int beforeY[DETECT_NUM];
-	int keycode = 0;
-	int detect_switch = 0;
-
-	XEvent event;
-
-	int mouse_status = 0;
-	int mouse_status_before = 0;
-
-	while(1){
+	while(TRUE){
 		for(i = 0; i < CAM_NUM; i++){
-			char winName[8] = "result";
-			winName[6] = 48 + i;
-			winName[7] = 0;
+			resultWinName[6] = 48 + i;
+			maskWinName[4] = 48 + i;
 
-			if(detect_switch){
-				detectAndDraw(cam_param[i], scale , detect_param[i], DETECT_NUM);
-			} else {
-				cam_param[i].frame.copyTo(cam_param[i].result_frame);
+			cam[i].read(orig_img[i]);
+
+			orig_img_gpu[i].upload(orig_img[i]);
+
+			Size sz(CAM_HEIGHT, CAM_WIDTH);
+
+//			GaussianBlur(orig_img_gpu[i], orig_img_gpu[i], Size(1, 1), 0, 0);
+//			bg_img_gpu[i].upload(bg_img[i]);
+//			GaussianBlur(bg_img_gpu[i], bg_img_gpu[i], Size(1, 1), 0, 0);
+//			bg_img_gpu[i].download(bg_img[i]);
+
+
+			if(i == 0){
+				gpu::rotate(orig_img_gpu[i], rotate_img_gpu[i], sz, -90, CAM_HEIGHT, 0);
+			}else if(i == 1){
+				gpu::rotate(orig_img_gpu[i], rotate_img_gpu[i], sz, 90, 0, CAM_WIDTH);
+			}else {
+				orig_img_gpu[i].copyTo(rotate_img_gpu[i]);
 			}
-			cv::imshow(winName, (Mat)cam_param[i].result_frame);
+
+
+			rotate_img_gpu[i].download(rotate_img[i]);
+			rotate_img[i].copyTo(dst_img[i]);
+
+			if(detectSwitch){
+//				if(i != 2){
+				if(false){
+					remove_bg_gpu(rotate_img[i], bg_img[i], bgremoved_img[i]);
+					imshow(maskWinName, bgremoved_img[i]);
+				}else
+					rotate_img[i].copyTo(bgremoved_img[i]);
+
+				bgremoved_img_gpu[i].upload(bgremoved_img[i]);
+				detect_obj_gpu(bgremoved_img_gpu[i], dst_img[i], captured_objects[i]);
+			}
+
+			imshow(resultWinName, dst_img[i]);
+
+// Key Event
+
+			keyCode = waitKey(1);
+			if(keyCode != -1)
+				cout << keyCode << endl;
+			if(keyCode == 1048675){		// 'C'
+				struct tm* today;
+				time_t ltime;
+				time(&ltime);
+
+				String filename = "";
+				stringstream ss;
+				ss << ltime;
+				filename = ss.str();
+				filename += "_";
+
+				imwrite(filename + "0.png", rotate_img[0]);
+				imwrite(filename + "1.png", rotate_img[1]);
+			} else if(keyCode == 1048691){ // 'S'
+				if(detectSwitch == false)
+					detectSwitch = true;
+				else
+					detectSwitch = false;
+			} else if(keyCode == 1048681){  // 'I'
+				for(j = 0; j < CAM_NUM; j++){
+					rotate_img[j].copyTo(bg_img[j]);
+				}
+			} else if(keyCode == 1048696){	//'X'
+				return 0;
+			}
+
+//			orig_img[i].copyTo(before_img[i]);
 		}
 
-		if(detect_switch){
-			if(detect_param[1][1].x != 0 && detect_param[1][1].y != 0){
-				if(beforeX[1] != detect_param[1][1].x || beforeY[1] != detect_param[1][1].y){
-					if(((beforeX[1] - detect_param[1][1].x < 10) && (beforeX[1] - detect_param[1][1].x > 0)) ||
-							((detect_param[1][1].x - beforeX[1] < 10) && (detect_param[1][1].x - beforeX[1] > 0))){
-						XWarpPointer(dpy, 0, w, 0, 0, 0, 0, (1320 - detect_param[1][1].x * 2), (detect_param[1][1].y * 3 - 120));
-						XFlush(dpy);
-					}
+		if(detectSwitch){
+			if(captured_objects[2].onoff){
+				real_objects[0].x = captured_objects[2].x;
+				real_objects[0].y = captured_objects[2].y;
+			}
+
+			if(captured_objects[0].onoff && captured_objects[1].onoff){
+				real_objects[1].x = (captured_objects[1].x - 40) * SCREEN_WIDTH / 150;
+				real_objects[1].z = captured_objects[1].y;
+				real_objects[1].y = ((320 - captured_objects[1].x) + captured_objects[0].x - 280) * SCREEN_HEIGHT / 80;
+				mouse_handler_object.set_point(SCREEN_WIDTH - real_objects[1].x, SCREEN_HEIGHT - real_objects[1].y);
+			}
+
+#ifdef CLICK_ENABLE
+			judgement_score = 0;
+			for(i = 0; i < 14; i++){
+				judgement[i] = judgement[i + 1];
+				judgement_score += judgement[i];
+			}
+			judgement[14] = captured_objects[0].onoff || captured_objects[1].onoff;
+
+			if(judgement_score > 10){
+				if(click_status[0] != 1 && click_status[1] != 1){
+					click_status[1] = 1;
+					cout << "Click" << endl;
+					cout << "Click" << endl;
+					cout << "Click" << endl;;
+					cout << "Click" << endl;;
+					mouse_handler_object.click();
+				} else {
+					click_status[1] = 1;
 				}
-			} else if(detect_param[1][2].x != 0){
-				if(((detect_param[1][2].x - beforeX[1]) < 50) && ((detect_param[1][2].x - beforeX[1]) > -50)){
-					cout << "CLICK!!" << endl;
-					cout << "CLICK!!" << endl;
-					cout << "CLICK!!" << endl;
-					cout << "CLICK!!" << endl;
-
-					memset (&event, 0x00, sizeof (event));
-					//				event.xbutton.button = button;
-					event.type = ButtonPress;
-					event.xbutton.button = Button1;
-					event.xbutton.same_screen = True;
-
-					XQueryPointer(dpy2, RootWindow(dpy2, DefaultScreen(dpy2)),
-							&event.xbutton.root, &event.xbutton.window, &event.xbutton.x_root,
-							&event.xbutton.y_root, &event.xbutton.x, &event.xbutton.y, &event.xbutton.state);
-
-
-
-					while(event.xbutton.subwindow)
-					{
-						event.xbutton.window = event.xbutton.subwindow;
-
-						XQueryPointer(dpy2, event.xbutton.window,
-								&event.xbutton.root, &event.xbutton.subwindow,&event.xbutton.x_root,
-								&event.xbutton.y_root, &event.xbutton.x, &event.xbutton.y, &event.xbutton.state);
-					}
-
-
-					if(XSendEvent(dpy2, PointerWindow, True, 0xfff, &event) == 0)
-						cout << "ERROR" << endl;
-
-					XFlush(dpy2);
-					usleep(200000);
-
-					event.type = ButtonRelease;
-					event.xbutton.state = 0x100;
-
-					if(XSendEvent(dpy2, PointerWindow, True, 0xfff, &event) == 0)
-						cout << "ERROR" << endl;
-
-					XFlush(dpy2);
-				}
+				click_status[0] = click_status[1];
 			} else {
-/*
-				event.type = ButtonRelease;
-				event.xbutton.state = 0x100;
-				if (XSendEvent(dpy2, PointerWindow, True, 0xfff, &event) == 0) cerr << "Error to send the event!" << endl;
-				XFlush (dpy2);
-*/
+				click_status[1] = 0;
+				click_status[0] = click_status[1];
 			}
+#endif
 
-
-
-			for(int i = 0; i < DETECT_NUM; i++){
-				if(detect_param[1][i].x != 0 && detect_param[1][i].y != 0){
-					/*
-					if(beforeX[i] != detect_param[1][i].x || beforeY[i] != detect_param[1][i].y){
-						XWarpPointer(dpy, 0, w, 0, 0, 0, 0, (1280 - detect_param[1][i].x * 3), (detect_param[1][i].y * 2));
-						XFlush(dpy);
-					}
-					 */
-
-
-
-					calc_objects[i].x = detect_param[1][i].x - 320;
-					calc_objects[i].y = detect_param[1][i].y;
-					calc_objects[i].z = (640 - detect_param[1][i].x) + detect_param[0][i].x;
-
-					beforeX[i] = detect_param[1][i].x;
-					beforeY[i] = detect_param[1][i].y;
-				}
-			}
-
-
-			cout << endl << endl;
-			cout << "Face1 \tx: " << detect_param[0][0].x << ", \ty: " << detect_param[0][0].y << endl;
-			cout << "Face2 \tx: " << detect_param[1][0].x << ", \ty: " << detect_param[1][0].y << endl;
-			cout << "FrontHand1 \tx: " << detect_param[0][1].x << ", \ty: " << detect_param[0][1].y << endl;
-			cout << "FrontHand2 \tx: " << detect_param[1][1].x << ", \ty: " << detect_param[1][1].y << endl;
-			cout << "BottomHand1 \tx: " << detect_param[0][2].x << ", \ty: " << detect_param[0][2].y << endl;
-			cout << "BottomHand2 \tx: " << detect_param[1][2].x << ", \ty: " << detect_param[1][2].y << endl;
-			cout << endl;
-			cout << "Face \t\tx: " << calc_objects[0].x << ", \ty: " << calc_objects[0].y << ", \tz: " << calc_objects[0].z << endl;
-			cout << "FrontHand \tx: " << calc_objects[1].x << ", \ty: " << calc_objects[1].y << ", \tz: " << calc_objects[1].z << endl;
-			cout << "BottomHand \tx: " << calc_objects[2].x << ", \ty: " << calc_objects[2].y << ", \tz: " << calc_objects[2].z << endl;
-		}
-
-		keycode = waitKey(1);
-		if(keycode != -1)
-			cout << keycode << endl;
-		if(keycode == 1048681){
-			cout << "Capture Background Picture" << endl;
+// Print Console
 			for(i = 0; i < CAM_NUM; i++){
-				cam_param[i].frame.copyTo(cam_param[i].background);
+				cout << "Captured Object" << i
+						<< " - x: " << captured_objects[i].x
+						<< ", y: " << captured_objects[i].y << endl;
 			}
-		} else if(keycode == 1048691){
-			detect_switch++;
-			detect_switch %= 2;
-		} else if(keycode == 1048696){
-			return 0;
+			cout << endl;
+
+			for(i = 0; i < 2; i++){
+				cout << "Real Object" << i
+						<< " - x: " << real_objects[i].x
+						<< ", y: " << real_objects[i].y
+						<< ", z: " << real_objects[i].z << endl;
+			}
+			cout << endl;
 		}
 
-		//		sleep(1);
+
 	}
 
-
-	/*
-	for(i = 0; i < CAMNUM; i++){
-		pthread_join(p_thread[i], (void **) &status);
+	for(i = 0; i < CAM_NUM; i++){
+		cam[i].release();
 	}
-	 */
-
-	//	status = pthread_mutex_destroy(&mutex);
 
 	return 0;
-}
-
-void extSubtract(GpuMat& src1, GpuMat& src2, GpuMat& dst){
-	int i, j, k;
-
-	Mat zero = Mat::zeros(src1.size(), CV_32F);
-	Mat src1Mat, src2Mat;
-	src1.download(src1Mat);
-	src2.download(src2Mat);
-
-	GpuMat distance;
-	distance.upload(zero);
-
-	GpuMat temp;
-
-
-	uchar *src1bgr, *src2bgr;
-	src1bgr = src1Mat.data;
-	src2bgr = src2Mat.data;
-
-	int src1bright = 0;
-	int src2bright = 0;
-	int diff_bright = 0;
-
-	for(i = 0; i < 5; i++){
-		for(j = 0; j < 5; j++){
-			for(k = 0; k < 3; k++){
-				src1bright += src1bgr[(640 * 3) * (5 + i) + (5 + j) + k];
-				src2bright += src2bgr[(640 * 3) * (5 + i) + (5 + j) + k];
-			}
-		}
-	}
-	src1bright /= 75;
-	src2bright /= 75;
-	diff_bright = src1bright - src2bright;
-
-	subtract(src1, Scalar(diff_bright, diff_bright, diff_bright), src1);
-
-
-	vector<GpuMat> src1Channels;
-	vector<GpuMat> src2Channels;
-	split(src1, src1Channels);
-	split(src2, src2Channels);
-
-	Mat cpuMask;
-	GpuMat mask, addTemp;
-	GpuMat test;
-
-	GpuMat dstChannel[3];
-
-
-/*
-	for(i = 0; i < 3; i++){
-		absdiff(src1Channels[i], src2Channels[i], temp);
-		temp.convertTo(temp, CV_32F);
-
-		add(distance, temp, distance);
-	}
-*/
-
-	absdiff(src1Channels[0], src2Channels[0], temp);
-	temp.convertTo(temp, CV_32F);
-
-	add(distance, temp, distance);
-
-
-	threshold(distance, mask, 30, 255, THRESH_BINARY);
-	mask.convertTo(mask, CV_8U);
-
-
-	int dilation_size = 1;
-	Mat element = getStructuringElement( 0,
-	                                       Size( 2 * dilation_size + 1, 2 * dilation_size + 1 ),
-	                                       Point( dilation_size, dilation_size ) );
-
-	erode(mask, test, element);
-	dilate(test, mask, element);
-	erode(mask, test, element);
-	dilate(test, mask, element);
-	erode(mask, test, element);
-
-
-	for(i = 0; i < 3; i++){
-		bitwise_and(src1Channels[i], test, dstChannel[i]);
-	}
-
-	merge(dstChannel, 3, dst);
-
-	//	mask.copyTo(dst);
-	dst.download(cpuMask);
-
-	imshow("mask", cpuMask);
-
-
-
-	if(waitKey(1) == 1048675){
-		struct tm* today;
-		time_t ltime;
-		time(&ltime);
-
-		String filename = "";
-		stringstream ss;
-		ss << ltime;
-		filename = ss.str();
-		filename += "_";
-
-
-		imwrite(filename + "0.png", cpuMask);
-	}
-}
-
-
-void mySubtract(Mat& src1, Mat& src2, Mat& dst){
-	int width = src1.cols;
-	int height = src1.rows;
-
-	int i, j, k;
-	int ptr = 0;
-
-	uchar *src1bgr, *src2bgr, *dstbgr;
-	uchar diff_pix;
-	int gray_p1, gray_p2;
-	int diff_bright;
-
-	Point pt;
-	ptr = 0;
-
-	src1bgr = src1.data;
-	src2bgr = src2.data;
-	dstbgr = dst.data;
-
-	gray_p1 = (src1bgr[((640*3) * 40 + 40)] * 0.114) + (src1bgr[((640*3) * 40 + 40) + 1] * 0.287) + (src1bgr[((640*3) * 40 + 40) + 2] * 0.299);
-	gray_p1 += (src1bgr[((640*3) * 41 + 40)] * 0.114) + (src1bgr[((640*3) * 41 + 40) + 1] * 0.287) + (src1bgr[((640*3) * 41 + 40) + 2] * 0.299);
-	gray_p1 += (src1bgr[((640*3) * 40 + 41)] * 0.114) + (src1bgr[((640*3) * 42 + 40) + 1] * 0.287) + (src1bgr[((640*3) * 42 + 40) + 2] * 0.299);
-	gray_p1 += (src1bgr[((640*3) * 41 + 41)] * 0.114) + (src1bgr[((640*3) * 42 + 40) + 1] * 0.287) + (src1bgr[((640*3) * 42 + 40) + 2] * 0.299);
-	gray_p2 = (src2bgr[((640*3) * 40 + 40)] * 0.114) + (src2bgr[((640*3) * 40 + 40) + 1] * 0.287) + (src2bgr[((640*3) * 40 + 40) + 2] * 0.299);
-	gray_p2 += (src2bgr[((640*3) * 41 + 40)] * 0.114) + (src2bgr[((640*3) * 41 + 40) + 1] * 0.287) + (src2bgr[((640*3) * 41 + 40) + 2] * 0.299);
-	gray_p2 += (src2bgr[((640*3) * 40 + 41)] * 0.114) + (src2bgr[((640*3) * 42 + 40) + 1] * 0.287) + (src2bgr[((640*3) * 42 + 40) + 2] * 0.299);
-	gray_p2 += (src2bgr[((640*3) * 41 + 41)] * 0.114) + (src2bgr[((640*3) * 42 + 40) + 1] * 0.287) + (src2bgr[((640*3) * 42 + 40) + 2] * 0.299);
-
-	gray_p1 /= 4;
-	gray_p2 /= 4;
-
-	diff_bright = gray_p1 - gray_p2;
-
-	for(i = 0; i < height * width * 3; i += 3){
-		//			ptr = i * width + j;
-		//			Point point(i, j);
-
-
-		gray_p1 = (src1bgr[i + 0] * 0.114) + (src1bgr[i + 1] * 0.287) + (src1bgr[i + 2] * 0.299) - diff_bright;
-		gray_p2 = (src2bgr[i + 0] * 0.114) + (src2bgr[i + 1] * 0.287) + (src2bgr[i + 2] * 0.299);
-
-		if(gray_p2 - gray_p1 < 0){
-			diff_pix = 0;
-		} else {
-			diff_pix = gray_p2 - gray_p1;
-		}
-
-		if(diff_pix < 10){
-			dstbgr[i] = 0;
-			dstbgr[i + 1] = 0;
-			dstbgr[i + 2] = 0;
-		}
-	}
-}
-
-
-void* cam_thread_body (void* data){
-	cam_params* param = (cam_params*)data;
-
-	char winName[8] = "result";
-	winName[6] = 48 + param->cam_num;
-	winName[7] = 0;
-
-	cout << "Capture " << winName << endl;
-
-	CvCapture* capture = 0;
-	Mat frame;
-
-	//capture camera image
-	capture = cvCaptureFromCAM(param->cam_num);
-
-	cvSetCaptureProperty(capture, CV_CAP_PROP_BRIGHTNESS, CAM_BRIGHT);
-
-	//create window
-	cvNamedWindow(winName, 1);  //arg2 = 1 for autosize
-
-	if(capture){
-		cout << "In capture ..." << endl;
-		while(TRUE)	{
-			IplImage* iplImg = cvQueryFrame(capture);
-			frame = iplImg;
-
-			if(frame.empty())
-				break;
-
-			//			pthread_mutex_lock(&mutex[param->cam_num]);
-			if(iplImg->origin == IPL_ORIGIN_TL){
-				frame.copyTo(param->frame);
-			}else{
-				flip(frame, param->frame, 0);
-			}
-
-			//			pthread_mutex_unlock(&mutex[param->cam_num]);
-		}
-	}
-	cvReleaseCapture( &capture );
-
-	return (void*) 0;
-}
-
-
-
-void detectAndDraw(cam_params& cam, double scale, detect_params* params, int params_cnt){
-
-	//	Mat& img = param->cam_param->frame;
-
-	GpuMat img, bgImg, blurImg, beforeImg;
-	GpuMat faceBuf[CAM_NUM * DETECT_NUM];
-	Mat faces_downloaded[CAM_NUM * DETECT_NUM];
-	Mat& result_img = cam.result_frame;
-	GpuMat gray, gray2, smallImg, hsv, hsv2, filtered, subImg;
-
-	CascadeClassifier_GPU* cascade[DETECT_NUM];
-
-	int i, j;
-
-	int maxHeight, maxX, maxY;
-
-	double t = 0;
-	Rect* faces_p[DETECT_NUM];
-	vector<Rect> faces[DETECT_NUM];
-
-	int detections_num[DETECT_NUM];
-
-	Mat subFrame;
-
-	/*
-	cam.frame.copyTo(subFrame);
-	mySubtract(cam.frame, cam.background, subFrame);
-	extSubtract(cam.frame, cam.background, subFrame);
-//			frame.copyTo(subFrame);
-
-	subFrame.copyTo(cam.frame);
-	subFrame.copyTo(cam.result_frame);
-	 */
-
-	img.upload(cam.frame);
-//	bgImg.upload(cam.background);
-	beforeImg.upload(cam.beforeFrame);
-
-	cout << img.type() << endl;
-
-	blurImg = GpuMat(img.size(), img.type());
-
-	//equalizeHist(img , img);
-
-//	GaussianBlur(bgImg, bgImg, Size(1, 1), 0, 0);
-//	GaussianBlur(img, img, Size(1, 1), 0, 0);
-
-	img.download(result_img);
-
-//	extSubtract(img, bgImg, subImg);
-	extSubtract(img, beforeImg, subImg);
-
-
-	cvtColor(subImg, gray, CV_BGR2GRAY);
-
-
-	//	cvtColor(filtered, gray, CV_BGR2GRAY);
-	Size sz(cvRound(gray.cols / scale), cvRound(gray.rows / scale));
-	resize( gray, smallImg, sz);
-	//	equalizeHist( smallImg, smallImg);
-
-
-	//	param->cam_param->frame.copyTo(img);
-	for(i = 0; i < DETECT_NUM; i++){
-		cascade[i] = &params[i].cascade;
-
-		cascade[i]->visualizeInPlace = true;
-		cascade[i]->findLargestObject = false;
-
-		detections_num[i] = cascade[i]->detectMultiScale( smallImg, faceBuf[i], 1.1, 1, Size(50, 50));
-
-
-		faceBuf[i].colRange(0, detections_num[i]).download(faces_downloaded[i]);
-
-		faces_p[i] = faces_downloaded[i].ptr<Rect>();
-
-		for(j = 0; j < detections_num[i]; j++){
-			faces[i].push_back(faces_p[i][j]);
-		}
-
-		j = 0;
-
-		int limitHeight = 60;
-		maxHeight = 0;
-		maxX = maxY = 0;
-		for( vector<Rect>::const_iterator r = faces[i].begin(); r != faces[i].end(); r++, j++ ){
-			Mat smallImgROI;
-			vector<Rect> nestedObjects;
-			Point center;
-			Scalar color = colors[i][j % 8];
-			int radius;
-
-			if(r->height > limitHeight){
-				center.x = cvRound((r->x + r->width*0.5)*scale);
-				center.y = cvRound((r->y + r->height*0.5)*scale);
-				radius = cvRound((r->width + r->height)*0.25*scale);
-				circle( (Mat&)result_img, center, radius, color, 3, 8, 0 );
-
-				if(r->height > maxHeight){
-					maxHeight = r->height;
-					maxX = center.x;
-					maxY = center.y;
-				}
-			}
-
-			//			params[i].x = center.x;
-			//			params[i].y = center.y;
-
-			//Commenting eye detection part out to make it faster...
-
-		}
-		params[i].x = maxX;
-		params[i].y = maxY;
-	}
-	cam.frame.copyTo(cam.beforeFrame);
-	//	cv::imshow(resultName, img );
 }
