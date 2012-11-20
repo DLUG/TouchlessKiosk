@@ -2,18 +2,34 @@
 <html lang="us">
 	<meta charset="utf-8">
 	<head>
+		<link rel="stylesheet" type="text/css" href="./css/styleShare.css" />
 		<script type="text/javascript">
-	var timeOut;
-	$(document).ready(function(){
-		timeOut = setTimeout('reset()', 4000); 
-	});
-	function reset() {
-		location.href = "./";
-	}
-	function resetTimeout() {
-		clearTimeout(timeOut);
-	}
-	</script>
+			$(document).keydown(function(event) {
+				if(event.which == 72) {
+					location.href="/kiosk/";
+				}
+			});
+			
+			var intervalId;
+			$(document).ready(function(){
+				settingTimeout();
+			});
+			function settingTimeout() {
+				intervalId = setTimeout(reset, 1000 * 60 * 10);
+			}
+			function reset() {
+				location.href = "/kiosk/ads.html";
+			}
+			function resetTimeout() {
+				clearTimeout(intervalId - 1);
+				clearTimeout(intervalId);
+			}
+			function backButton() {
+				resetTimeout();
+				settingTimeout();
+				location.href = "/kiosk/main.html";
+			}
+		</script>
 </head>
 
 <body>
@@ -123,14 +139,7 @@
 			</div>
 		</div>
 		<div class="mainBottom">&nbsp;</div>
-	</div>
-	
-	<div id="dialog">
-		<video width="700" id="a_video">
-			<source id="movie_src" type="video/mp4" />
-		</video>
-	</div>
-	
+	</div>	
 	<div style="clear:both;" width="0" height="0">
 		<iframe src="http://translate.google.com/translate_tts?tl=en&q=What do you want to watch?" width="0" height="0"></iframe>
 	</div>

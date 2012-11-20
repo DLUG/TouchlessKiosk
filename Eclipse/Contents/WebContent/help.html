@@ -2,18 +2,34 @@
 <html lang="us">
 	<meta charset="utf-8">
 	<head>
+	<link rel="stylesheet" type="text/css" href="./css/styleShare.css" />
 	<script type="text/javascript">
-	var timeOut;
-	$(document).ready(function(){
-		timeOut = setTimeout('reset()', 4000); 
-	});
-	function reset() {
-		location.href = "./";
-	}
-	function resetTimeout() {
-		clearTimeout(timeOut);
-	}
-	</script>
+			$(document).keydown(function(event) {
+				if(event.which == 72) {
+					location.href="/kiosk/";
+				}
+			});
+			
+			var intervalId;
+			$(document).ready(function(){
+				settingTimeout();
+			});
+			function settingTimeout() {
+				intervalId = setTimeout(reset, 1000 * 60 * 10);
+			}
+			function reset() {
+				location.href = "/kiosk/ads.html";
+			}
+			function resetTimeout() {
+				clearTimeout(intervalId - 1);
+				clearTimeout(intervalId);
+			}
+			function backButton() {
+				resetTimeout();
+				settingTimeout();
+				location.href = "/kiosk/main.html";
+			}
+		</script>
 </head>
 
 <body>
@@ -39,7 +55,7 @@
 			</div>
 			<div class="content">
 <span class="title">▶ Manual</span>
-<pre class="helpSize">When a person comes in front of a kiosk the system speaks welcome messages requests the voice command from that person. When the system successes in recognizing the voice command, it provides the information on what he wants.
+<pre class="helpSize">when a person comes in front of a kiosk the system speaks welcome messages requests the voice command from that person When the system successes in recognizing the voice command, it provides the information on what he wants.
 
 If it fails to recognize that command, the system displays the menu in tile-arrayed format.
 
@@ -70,12 +86,6 @@ E-mail : kiosk@thdev.net
 			<a href="http://ulug.or.kr"><img src="./res/ulug.png" width="230px" /></a>
 		</div>
 		<div class="mainBottom">&nbsp;</div>
-	</div>
-	
-	<div id="dialog">
-		<video width="700" id="a_video">
-			<source id="movie_src" type="video/mp4" />
-		</video>
 	</div>
 </body>
 </html>

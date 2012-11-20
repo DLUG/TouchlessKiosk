@@ -5,17 +5,32 @@
 		<link rel="stylesheet" type="text/css" href="./css/styleShare.css" />
 		<script src="js/jquery-1.8.2.js"></script>
 		<script type="text/javascript">
-	var timeOut;
-	$(document).ready(function(){
-		timeOut = setTimeout('reset()', 4000); 
-	});
-	function reset() {
-		location.href = "./";
-	}
-	function resetTimeout() {
-		clearTimeout(timeOut);
-	}
-	</script>
+			$(document).keydown(function(event) {
+				if(event.which == 72) {
+					location.href="/kiosk/";
+				}
+			});
+			
+			var intervalId;
+			$(document).ready(function(){
+				settingTimeout();
+			});
+			function settingTimeout() {
+				intervalId = setTimeout(reset, 1000 * 60 * 10);
+			}
+			function reset() {
+				location.href = "/kiosk/ads.html";
+			}
+			function resetTimeout() {
+				clearTimeout(intervalId - 1);
+				clearTimeout(intervalId);
+			}
+			function backButton() {
+				resetTimeout();
+				settingTimeout();
+				location.href = "/kiosk/main.html";
+			}
+		</script>
 </head>
 
 <body>
