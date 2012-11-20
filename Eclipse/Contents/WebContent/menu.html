@@ -1,0 +1,140 @@
+﻿<!doctype html>
+<html lang="us">
+	<meta charset="utf-8">
+	<head>
+		<link rel="stylesheet" type="text/css" href="./css/styleShare.css" />
+		<script src="js/jquery-1.8.2.js"></script>
+		<script type="text/javascript">
+	var timeOut;
+	$(document).ready(function(){
+		timeOut = setTimeout('reset()', 4000); 
+	});
+	function reset() {
+		location.href = "./";
+	}
+	function resetTimeout() {
+		clearTimeout(timeOut);
+	}
+	</script>
+</head>
+
+<body>
+	<link rel="stylesheet" type="text/css" href="./css/styleShareTable.css" />
+	<script type="text/javascript">
+	$(document).ready(function(){
+		resetTimeout();
+		settingTimeout();
+	});
+			$(document).ready(function() {
+				$("#studentBtn").click(function() {
+					resetTimeout();
+					settingTimeout();
+					$("#teacherBtn").css('color', '#FFFFFF');
+					$("#studentBtn").css('color', '#005660');
+					$("#student").show();
+					$("#teacher").hide();
+					$.ajax({
+						  type: "GET",
+						  url: "/kiosk/api/voice",
+						  data: { mode: "add_usermenu", value: "Student Menu" }
+						});
+				});
+				$("#teacherBtn").click(function() {
+					resetTimeout();
+					settingTimeout();
+					$("#teacherBtn").css('color', '#005660');
+					$("#studentBtn").css('color', '#FFFFFF');
+					$("#student").hide();
+					$("#teacher").show();
+					$.ajax({
+						  type: "GET",
+						  url: "/kiosk/api/voice",
+						  data: { mode: "add_usermenu", value: "Teacher Menu" }
+						});
+				});
+			});
+		</script>
+
+	<div class="container">
+		<div class="mainTitle">&nbsp;</div>
+		<div class="mainContainer">
+			<div class="navigationBar">
+				<div class="navigationBackButton floatLeft" onclick="backButton();">&nbsp;</div>
+				<div class="navigationTitle floatLeft">
+					<div id="studentBtn" class="floatLeft menuSelectTitle" style="color: #005660;">
+						Student cafeteria menu
+					</div>
+					<div class="floatLeft bar">
+						<img src="res/bar.png" />
+					</div>
+					<div id="teacherBtn" class="floatLeft menuSelectTitle">
+						Teacher cafeteria menu
+					</div>
+				</div>
+			</div>
+			<div class="content">
+				<div id="student">
+					<table class="menuTable">
+						<tr class="topLine">
+							<td class="bold center bottomLine">Date</td>
+							<td class="bold center bottomLine">Menu</td>
+						</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.12(Mon)</td>
+						<td class="bottomLine tableMargin">1. Hanbab 2,500 won : Tuna kimchi stew(Chinese cabbage : Domestic), Cooked rice(Rice : Domestic), Beans cooked in soy sauce, Radish Kimchi<br />2. Sodam 2,800 won : Pork vegetable bibimbap(Rice : Domestic / Pork : Domestic), Bean sprouts soup, Acorn Jelly Salad, Pickled radish <br />3. Alcheon 3,000 won : Chicken cutlet(Chicken : Domestic), Cooked rice(Rice : Domestic), Bean sprouts soup, Salad, Pickled radish</td>
+					</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.13(Tue)</td>
+						<td class="bottomLine tableMargin">1. Hanbab 2,500 won : Noodles, Rice ball(Rice : Domestic), Stir-fried boiled fish paste, Pickled radish <br />2. Sodam 3,000 won : Pork cutlet with sweet potato and cheese(Pork : Domestic), Cooked rice(Rice : Domestic), Seaweed Soup, Pickled radish<br />3. Alcheon 2,900 won : Cooked rice(Rice : Domestic), Seaweed Soup, Stir-fried small octopus, Stir-fried anchovies, Kimchi(Chinese cabbage : Domestic)</td>
+					</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.14(Wed)</td>
+						<td class="bottomLine tableMargin">1. Hanbab 2,700 won : Short rib soup(Rib : Austailian), Cooked rice(Rice : Domestic), Stir-fried small octopus, Radish Kimchi <br />2. Sodam 2,800 won : Kimchi fried rice(Rice, Kimchi : Domestic), Soup, Corn dog, Pickled radish <br />3. Alcheon 3,000 won : Pork cutlet(Pork : Domestic), Cooked rice(Rice : Domestic), Soup, Salad, Pickled radish</td>
+					</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.15(Thur)</td>
+						<td class="bottomLine tableMargin">1. Hanbab 2,300 won : Mandu Hot Pot, Cooked rice(Rice : Domestic), Bean sprouts soup, Pickled radish <br />2. Sodam 3,000 won : Bulgogi with Rice, Bean sprouts soup, Beverage, Pickled radish <br />3. Alcheon 2,900 won : Cooked rice(Rice : Domestic), Soup, Meatball, Beef Braised in Soy Sauce, Sweet Rice Puffs, Kimchi</td>
+					</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.16(Fri)</td>
+						<td class="bottomLine tableMargin">1. Hanbab 2,500 won : Spicy Sausage Stew(Chinese cabbage : Domestic), Cooked rice(Rice : Domestic), Salad, Radish Kimchi <br />2. Sodam 2,900 won : Omelette with sausages(Rice : Domestic), Seaweed Soup, Corn salad, Pickled radish <br />3. Alcheon 3,000 won : Beefsteak, Cooked rice(Rice : Domestic), Seaweed Soup, Corn salad, Pickled radish</td>
+					</tr>
+				</table>
+				</div>
+				<div id="teacher" style="display: none;">
+					<table class="menuTable">
+						<tr class="topLine">
+							<td class="bold center bottomLine">Date</td>
+							<td class="bold center bottomLine">Menu</td>
+						</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.12(Mon)</td>
+						<td class="bottomLine tableMargin">1. Sura 4,000 won : Cooked rice(Rice : Domestic), Beef, Soybean Paste Soup, Sweet and sour pork, Balloon flower root salad, Kimchi<br />2. Alcheon 4,000 won : Pork cutlet, Cooked rice(Rice : Domestic), Clear soup, Bread &amp; Jam, Salad, Pickle, Kimchi</td>
+					</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.13(Tue)</td>
+						<td class="bottomLine tableMargin">1. Sura 4,000 won : Fried mackerel, Cooked rice(Rice : Domestic), Bean sprouts soup, Soft tofu, Crisp laver, Kimchi<br />2. Alcheon 4,000 won : Kalguksu, Cooked rice(Rice : Domestic), Sweet Rice Puffs, Pickled radish, Kimchi</td>
+					</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.14(Wed)</td>
+						<td class="bottomLine tableMargin">1. Sura 4,000 won : Sweet Rice Puffs, Cooked rice(Rice : Domestic), Seaweed Soup, Braised Pan-fried Tofu, Lettuce, Kimchi<br />2. Alcheon 4,000 : Spicy Stir-Fried Squid with Rice, Udon, Tteokbokki, Pickled radish, Kimchi</td>
+					</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.15(Thur)</td>
+						<td class="bottomLine tableMargin">1. Sura 4,000 won : Cabbage and Short Rib Soup, Cooked rice(Rice : Domestic), Scrambled egg, Stir-fried squid, Fried kelp, Radish kimchi<br />2. Alcheon 4,000 won : Hot Stone Pot Bibimbap, Seaweed Soup, Spring roll, Pickled radish, Radish Kimchi</td>
+					</tr>
+					<tr>
+						<td class="bold center bottomLine">2012.11.16(Fri)</td>
+						<td class="bottomLine tableMargin">1. Sura 4,000 won : Tuna Kimchi Fried Rice, Cooked rice(Rice : Domestic), Bean Sprout Soup with dried pollack, Fried tofu, Young radish kimchi, Radish Kimchi<br />2. Alcheon 4,000 won : Jjolmyeon, Dried Seaweed Rolls(Rice : Domestic), Udon, Pork cutlet &amp; Sauce, Pickled radish, Radish Kimchi</td>
+					</tr>
+				</table>
+				</div>
+			</div>
+		</div>
+		<div class="mainBottom">&nbsp;</div>
+	</div>
+	<div style="clear:both;" width="0" height="0">
+		<iframe src="http://translate.google.com/translate_tts?tl=en&q=What do you want to eat?" width="0" height="0"></iframe>
+	</div>
+</body>
+</html>

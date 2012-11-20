@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+	<meta charset="utf-8">
+	<head>
+		<link rel="stylesheet" href="./css/jquery.mobile-1.2.0.min.css" />
+		<link href="./css/dot-luv/jquery-ui-1.9.0.custom.css" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="./css/styleShare.css" />
+		<link rel="stylesheet" type="text/css" href="./css/styleMain.css" />
+		
+		<script src="js/jquery-1.8.2.js"></script>
+		<script src="js/jquery.mobile-1.2.0.min.js"></script>
+</head>
+<body>
+	<script type="text/javascript">
+	//11.15 add taehwan
+	$(document).keydown(function(event) {
+		if(event.which == 72) {
+			location.href="/kiosk/";
+		}
+	});
+	
+	var intervalId;
+	$(document).ready(function(){
+		settingTimeout();
+	});
+	function settingTimeout() {
+		intervalId = setTimeout(reset, 1000 * 60 * 2);
+	}
+	function reset() {
+		location.href = "/kiosk/ads.html";
+	}
+	function resetTimeout() {
+		clearTimeout(intervalId - 1);
+		clearTimeout(intervalId);
+	}
+	function backButton() {
+		resetTimeout();
+		settingTimeout();
+		history.back();
+	}
+	
+	</script>
+	<div class="container">
+		<div class="mainTitle">&nbsp;</div>
+		<div class="mainContainer">
+			<div class="white shadow topMargin LeftMargin floatLeft">
+				<a href="navigation.html" data-rel="main" data-transition="pop"><img src="./res/menu/mainMenu_00.png" /></a></div>
+				<div class="white shadow topMargin LeftMargin floatLeft">
+				<a href="menu.html" data-transition="pop"><img src="./res/menu/mainMenu_01.png" /></a></div>
+			<div class="both"></div>
+			<div class="white shadow topMargin LeftMargin floatLeft">
+				<a href="performance.html" data-transition="pop"><img src="./res/menu/mainMenu_02.png" /></a></div>
+			<div class="white shadow topMargin LeftMargin floatLeft">
+				<a href="help.html" data-transition="pop" ><img src="./res/menu/mainMenu_03.png" /></a></div>
+			<div class="both"></div>
+		</div>
+		<div class="mainBottom">&nbsp;</div>
+	</div>
+	<div width="0" height="0">
+		<iframe src="http://translate.google.com/translate_tts?tl=en&q=Please select the menu" width="0" height="0"></iframe>
+	</div>
+</body>

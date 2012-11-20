@@ -1,0 +1,27 @@
+﻿.mike {
+	font-size: 25px;
+	width: 25px;
+	height: 25px;
+	cursor: pointer;
+	margin-top: 145px;
+	margin-left: 145px;
+	border: none;
+	outline: none;
+	background: transparent;
+	-webkit-transform: scale(5.0, 5.0);
+	-moz-transform: scale(5.0, 5.0);
+	-ms-transform: scale(5.0, 5.0);
+	transform: scale(5.0, 5.0);
+}
+
+.speech_div {
+	position:absolute;
+	left: 718px;
+	top: 94px;
+}
+.mainBody {
+	margin-left: 30px;
+	margin-top: 24px;
+	width: 965px;
+	height: 590px;
+}

@@ -1,0 +1,37 @@
+﻿.menuSelectTitle {
+	padding-top: 10px;
+	font-size: 34px;
+	vertical-align: middle;	
+	cursor: pointer;
+}
+
+.bar {
+	margin-left: 7px;
+	margin-right: 7px;
+	background: url(../res/bar.png) no-repeat left top;
+	width: 5px;
+	height: 70px;
+}
+.menuTable {
+	border-collapse: collapse;
+	width: 100%;
+	height: 500px;
+}
+.bold {
+	font-weight: bold;
+}
+.center {
+	text-align: center;
+}
+.bottomLine {
+	border-bottom: 2px solid #009cae;
+}
+.bottomLine2 {
+	border-bottom: 1px solid #01c5dc;
+}
+.tableMargin {
+	padding-left: 10px;
+}
+.verticalTop {
+	vertical-align: top;
+}

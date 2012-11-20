@@ -1,0 +1,81 @@
+﻿<!doctype html>
+<html lang="us">
+	<meta charset="utf-8">
+	<head>
+	<script type="text/javascript">
+	var timeOut;
+	$(document).ready(function(){
+		timeOut = setTimeout('reset()', 4000); 
+	});
+	function reset() {
+		location.href = "./";
+	}
+	function resetTimeout() {
+		clearTimeout(timeOut);
+	}
+	</script>
+</head>
+
+<body>
+	<link rel="stylesheet" type="text/css" href="./css/styleHelp.css" />
+	<script type="text/javascript">
+	$(document).ready(function(){
+		resetTimeout();
+		settingTimeout();
+	});
+	
+	$.ajax({
+		  type: "GET",
+		  url: "/kiosk/api/voice",
+		  data: { mode: "add_usermenu", value: "Help" }
+		});
+	</script>
+	<div class="container">
+		<div class="mainTitle">&nbsp;</div>
+		<div class="mainContainer">
+			<div class="navigationBar">
+				<div class="navigationBackButton floatLeft" onclick="backButton();">&nbsp;</div>
+				<div class="navigationTitle floatLeft">Help</div>
+			</div>
+			<div class="content">
+<span class="title">▶ Manual</span>
+<pre class="helpSize">When a person comes in front of a kiosk the system speaks welcome messages requests the voice command from that person. When the system successes in recognizing the voice command, it provides the information on what he wants.
+
+If it fails to recognize that command, the system displays the menu in tile-arrayed format.
+
+Instead of clicking a menu button directly, we capture a finger motion in air and decide which button he selects.
+After choosing the touch button on what he wants, the kiosk operates in a normal way and pops up the information that he asks for.</pre>
+<span class="title">▶ Product Specification</span>
+<pre class="helpSize">
+Hardware: PC, LCD Projector, Webcams, IR lamp
+Operating System: Ubuntu 12.04 64-bit(Linux Kernel 3.2.0)
+Software: OpenCV 2.4, CUDA 4.2, Google Voice Recognition
+</pre>
+<span class="title">▶ Developer</span>
+<pre class="helpSize">
+Tae-hwan Kwon, Leader &amp; User Interface Design.
+Jae-hun Jeong, Member &amp; Hand-Gesture Recognition.
+Dae-song Kim, Member &amp; Face Recognition.
+</pre>
+<span class="title">▶ Administrator</span>
+<pre class="helpSize">
+Name : Tae-hwan Kwon
+CellPhone : +82 10 8716 6178
+E-mail : kiosk@thdev.net
+</pre>
+			</div>
+		</div>
+		<div class="character">
+			<a href="http://dlug.org"><img src="./res/dlug.png" width="200px" /></a>
+			<a href="http://ulug.or.kr"><img src="./res/ulug.png" width="230px" /></a>
+		</div>
+		<div class="mainBottom">&nbsp;</div>
+	</div>
+	
+	<div id="dialog">
+		<video width="700" id="a_video">
+			<source id="movie_src" type="video/mp4" />
+		</video>
+	</div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<point_right_96 type_id="opencv-haar-classifier">
+  <size>
+    96 96</size>
+  <stages>
+    <_>
+      <!-- stage 0 -->
+      <trees>
+        <_>
+          <!-- tree 0 -->
+          <_>
+            <!-- root node -->
+            <feature>
+              <rects>
+                <_>
+                  0 0 8 18 -1.</_>
+                <_>
+                  0 6 8 6 3.</_></rects>
+              <tilted>0</tilted></feature>
+            <threshold>1.7949919856619090e-04</threshold>
+            <left_val>-1.</left_val>
+            <right_val>1.</right_val></_></_></trees>
+      <stage_threshold>1.</stage_threshold>
+      <parent>-1</parent>
+      <next>-1</next></_>
+    <_>
+      <!-- stage 1 -->
+      <trees>
+        <_>
+          <!-- tree 0 -->
+          <_>
+            <!-- root node -->
+            <feature>
+              <rects>
+                <_>
+                  0 0 8 9 -1.</_>
+                <_>
+                  0 3 8 3 3.</_></rects>
+              <tilted>0</tilted></feature>
+            <threshold>-6.3669773226138204e-05</threshold>
+            <left_val>-1.</left_val>
+            <right_val>9.9999988079071045e-01</right_val></_></_></trees>
+      <stage_threshold>9.9999988079071045e-01</stage_threshold>
+      <parent>0</parent>
+      <next>-1</next></_>
+    <_>
+      <!-- stage 2 -->
+      <trees>
+        <_>
+          <!-- tree 0 -->
+          <_>
+            <!-- root node -->
+            <feature>
+              <rects>
+                <_>
+                  0 0 44 82 -1.</_>
+                <_>
+                  0 0 22 41 2.</_>
+                <_>
+                  22 41 22 41 2.</_></rects>
+              <tilted>0</tilted></feature>
+            <threshold>5.3383048623800278e-02</threshold>
+            <left_val>-1.</left_val>
+            <right_val>1.</right_val></_></_></trees>
+      <stage_threshold>1.</stage_threshold>
+      <parent>1</parent>
+      <next>-1</next></_></stages></point_right_96>
+</opencv_storage>

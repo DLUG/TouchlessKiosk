@@ -1,0 +1,74 @@
+﻿<!doctype html>
+<html lang="us">
+	<meta charset="utf-8">
+	<head>
+		<link rel="stylesheet" type="text/css" href="./css/styleIndex.css" />
+		<link rel="stylesheet" type="text/css" href="./css/styleShare.css" />
+		<script src="./js/jquery-1.8.2.js" type="text/javascript"></script>
+<script type="text/javascript">
+	function voiceSuccess(url) {
+		$.ajax({
+			  type: "GET",
+			  url: "/kiosk/api/voice",
+			  data: { mode: "voice_success" }
+			}).done(function(){
+				location.href = url;
+			});
+	}
+	function getspeech(speech) {
+	switch(speech.value) {
+		case "menu":
+			voiceSuccess("./menu.html");
+			break;
+		case "navigation":
+			voiceSuccess("./navigation.html");
+			break;
+		case "performance":
+			voiceSuccess("./performance.html");
+			break;
+		case "help":
+			voiceSuccess("./help.html");
+			break;
+		default:
+			$.ajax({
+				  type: "GET",
+				  url: "/kiosk/api/voice",
+				  data: { mode: "add_voice", value: speech.value }
+				}).done(function(){
+					location.href = "main.html";
+				});
+			break;
+	}
+}
+	var intervalId;
+	$(document).ready(function(){
+		settingTimeout();
+	});
+	function settingTimeout() {
+		intervalId = setTimeout(reset, 1000 * 60 * 2);
+	}
+	function reset() {
+		location.href = "/kiosk/ads.html";
+	}
+	function resetTimeout() {
+		clearTimeout(intervalId - 1);
+		clearTimeout(intervalId);
+	}
+</script>
+</head>
+<body style="background-color: #f0f0f0;">
+	<div class="container">
+		<div class="mainTitle">&nbsp;</div>
+		<div class="mainContainer" style="height:596px;">
+			<div class="speech_div">
+				<input class="mike" x-webkit-speech onwebkitspeechchange="javascript:getspeech(this)" />
+			</div>
+			<div class="mainBody shadow white"><img src="./res/first.png" /></div>
+		</div>
+		<div class="mainBottom">&nbsp;</div>
+	</div>
+	<div style="display:none">
+		<iframe src="http://translate.google.com/translate_tts?tl=en&q=What can I do for you? After click microphone icon. Please say what you want"></iframe>
+	</div>
+</body>
+</html>
