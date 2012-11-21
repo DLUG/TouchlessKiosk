@@ -5,12 +5,6 @@
 		<link rel="stylesheet" type="text/css" href="./css/styleShare.css" />
 		<script src="js/jquery-1.8.2.js"></script>
 		<script type="text/javascript">
-			$(document).keydown(function(event) {
-				if(event.which == 72) {
-					location.href="/kiosk/";
-				}
-			});
-			
 			var intervalId;
 			$(document).ready(function(){
 				settingTimeout();
@@ -31,6 +25,7 @@
 				location.href = "/kiosk/main.html";
 			}
 		</script>
+		<script src="./js/common.js" type="text/javascript"></script>
 </head>
 
 <body>
