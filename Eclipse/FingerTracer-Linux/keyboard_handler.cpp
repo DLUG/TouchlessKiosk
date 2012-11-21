@@ -24,4 +24,11 @@ void keyboard_handler::click(KeySym keySymbol){
 	cout << "\nreleased\n";
 	XTestFakeKeyEvent(display, keycode, False, CurrentTime);
 	XFlush(display);
+
+
+	cout << "Pressed" << endl;
+	cout << "Pressed" << endl;
+	cout << "Pressed" << endl;
+	cout << "Pressed" << endl;
+
 }
