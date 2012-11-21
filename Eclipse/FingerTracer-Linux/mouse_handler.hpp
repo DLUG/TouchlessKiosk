@@ -21,10 +21,8 @@ private:
 	int y;
 	int lock;
 	Display *dpy;
-	Display *dpy2;
 
 	Window w;
-	XEvent event;
 	Window root;
 
 public:

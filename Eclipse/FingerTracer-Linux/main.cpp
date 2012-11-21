@@ -161,6 +161,8 @@ int main(){
 				}
 			} else if(keyCode == 1048696){	//'X'
 				return 0;
+			} else if(keyCode == 1048685){	//'M'
+				mouse_handler_object.click();
 			}
 
 //			orig_img[i].copyTo(before_img[i]);
@@ -190,10 +192,6 @@ int main(){
 			if(judgement_score > 10){
 				if(click_status[0] != 1 && click_status[1] != 1){
 					click_status[1] = 1;
-					cout << "Click" << endl;
-					cout << "Click" << endl;
-					cout << "Click" << endl;;
-					cout << "Click" << endl;;
 					mouse_handler_object.click();
 				} else {
 					click_status[1] = 1;

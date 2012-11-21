@@ -11,7 +11,6 @@
 
 mouse_handler::mouse_handler(){
 	dpy = XOpenDisplay(0);
-	dpy2 = XOpenDisplay(0);
 	root = DefaultRootWindow(dpy);
 
 	int blackColor = BlackPixel(dpy, DefaultScreen(dpy));
@@ -30,7 +29,10 @@ void mouse_handler::set_point(int tmpX, int tmpY){
 
 void mouse_handler::click(){
 	lock = 1;
-	int button = 0;
+	int button = 1;
+
+	XEvent event;
+	Display *dpy2 = XOpenDisplay(NULL);
 	memset(&event, 0x00, sizeof(event));
 
 	event.type = ButtonPress;
@@ -49,35 +51,54 @@ void mouse_handler::click(){
 
 	event.xbutton.subwindow = event.xbutton.window;
 
-//	while(event.xbutton.subwindow)
-//	{
+	while(event.xbutton.subwindow){
 		event.xbutton.window = event.xbutton.subwindow;
-
 		XQueryPointer(dpy2, event.xbutton.window,
 				&event.xbutton.root,
 				&event.xbutton.subwindow,
 				&event.xbutton.x_root,
-				&event.xbutton.y_root, &event.xbutton.x, &event.xbutton.y, &event.xbutton.state);
-//	}
+				&event.xbutton.y_root,
+				&event.xbutton.x,
+				&event.xbutton.y,
+				&event.xbutton.state);
+	}
 
-		if(XSendEvent(dpy2, PointerWindow, True, 0xfff, &event) == 0)
-			cout << "Error nell'invio dell'evento !!!\n";
+
+	if(XSendEvent(dpy2, PointerWindow, True, 0xfff, &event) == 0)
+		cout << "Error nell'invio dell'evento !!!\n";
+
+/*
+	if(XSendEvent(dpy2, RootWindow(dpy2, DefaultScreen(dpy2)), True, 0xfff, &event) == 0)
+		cout << "Error nell'invio dell'evento !!!\n";
+*/
 
 	XFlush(dpy2);
+
+	cout << "Click" << endl;
+	cout << "Click" << endl;
+	cout << "Click" << endl;
+	cout << "Click" << endl;
 
 	usleep(100000);
 
 	event.type = ButtonRelease;
 	event.xbutton.state = 0x100;
-		if(XSendEvent(dpy2, PointerWindow, True, 0xfff, &event) == 0)
-			cout << "Error nell'invio dell'evento !!!\n";
+
+
+	if(XSendEvent(dpy2, PointerWindow, True, 0xfff, &event) == 0)
+		cout << "Error nell'invio dell'evento !!!\n";
+/*
+	if(XSendEvent(dpy2, RootWindow(dpy2, DefaultScreen(dpy2)), True, 0xfff, &event) == 0)
+		cout << "Error nell'invio dell'evento !!!\n";
+*/
 
 	XFlush(dpy2);
 	usleep(100000);
 	lock = 0;
+
+	XCloseDisplay(dpy2);
 }
 
 mouse_handler::~mouse_handler(){
 	XCloseDisplay(dpy);
-	XCloseDisplay(dpy2);
 }
