@@ -13,7 +13,7 @@
 				intervalId = setTimeout(reset, 1000 * 60 * 10);
 			}
 			function reset() {
-				location.href = "/kiosk/ads.html";
+				location.href = "/Contents/ads.html";
 			}
 			function resetTimeout() {
 				clearTimeout(intervalId - 1);
@@ -22,7 +22,7 @@
 			function backButton() {
 				resetTimeout();
 				settingTimeout();
-				location.href = "/kiosk/main.html";
+				location.href = "/Contents/main.html";
 			}
 		</script>
 		<script src="./js/common.js" type="text/javascript"></script>
@@ -45,7 +45,7 @@
 					$("#teacher").hide();
 					$.ajax({
 						  type: "GET",
-						  url: "/kiosk/api/voice",
+						  url: "/Contents/api/voice",
 						  data: { mode: "add_usermenu", value: "Student Menu" }
 						});
 				});
@@ -58,7 +58,7 @@
 					$("#teacher").show();
 					$.ajax({
 						  type: "GET",
-						  url: "/kiosk/api/voice",
+						  url: "/Contents/api/voice",
 						  data: { mode: "add_usermenu", value: "Teacher Menu" }
 						});
 				});
