@@ -14,6 +14,7 @@
 #include "detect_obj.hpp"
 #include "remove_bg.hpp"
 #include "mouse_handler.hpp"
+#include "keyboard_handler.hpp"
 
 typedef struct real_object{
 	int x;

@@ -23,12 +23,19 @@ int main(){
 	object_gpu_t captured_objects[CAM_NUM];
 	real_object_t real_objects[2];
 
-	int judgement[30];
-	int judgement_score = 0;
+	mouse_handler mouse_handler_object;
+	keyboard_handler keyboard_handler_object;
+
+	int face_judgement[30];
+	int face_judgement_score = 0;
+	int face_status[2] = {0, 0};
+
+	int hand_judgement[30];
+	int hand_judgement_score = 0;
 	int click_status[2] = {0, 0};
 
 	for(i = 0; i < 30; i++){
-		judgement[i] = 0;
+		hand_judgement[i] = 0;
 	}
 
 	for(i = 0; i < 2; i++){
@@ -38,7 +45,6 @@ int main(){
 	}
 	real_objects[0].z = 1000;
 
-	mouse_handler mouse_handler_object;
 
 	for(i = 0; i < CAM_NUM; i++){
 		if(!cam[i].open(i)){
@@ -182,20 +188,43 @@ int main(){
 			}
 
 #ifdef CLICK_ENABLE
-			judgement_score = 0;
+// Click with Face
+			face_judgement_score = 0;
 			for(i = 0; i < 14; i++){
-				judgement[i] = judgement[i + 1];
-				judgement_score += judgement[i];
+				face_judgement[i] = face_judgement[i + 1];
+				face_judgement_score += face_judgement[i];
 			}
-			judgement[14] = captured_objects[0].onoff || captured_objects[1].onoff;
+			face_judgement[14] = captured_objects[2].onoff;
 
-			if(judgement_score > 10){
-				if(click_status[0] != 1 && click_status[1] != 1){
-					click_status[1] = 1;
-					mouse_handler_object.click();
-				} else {
-					click_status[1] = 1;
+			if(face_judgement_score > 10){
+				face_status[1] = 1;
+
+				if(face_status[0] != 1 && face_status[1] != 1){
+					keyboard_handler_object.click(XK_H);
 				}
+				face_status[0] = face_status[1];
+			} else {
+				face_status[1] = 0;
+				face_status[0] = face_status[1];
+			}
+
+
+
+// Click with Hand
+			hand_judgement_score = 0;
+			for(i = 0; i < 14; i++){
+				hand_judgement[i] = hand_judgement[i + 1];
+				hand_judgement_score += hand_judgement[i];
+			}
+			hand_judgement[14] = captured_objects[0].onoff || captured_objects[1].onoff;
+
+			if(hand_judgement_score > 10){
+				click_status[1] = 1;
+
+				if(click_status[0] != 1 && click_status[1] != 1){
+					mouse_handler_object.click();
+				}
+
 				click_status[0] = click_status[1];
 			} else {
 				click_status[1] = 0;
