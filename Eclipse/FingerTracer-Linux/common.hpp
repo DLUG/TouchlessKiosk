@@ -19,7 +19,7 @@
 #define FALSE 0
 #define DEBUG
 #define DEBUG_SCREEN
-#define CLICK_ENABLE
+//#define CLICK_ENABLE
 //#define CAM_BRIGHT 0.4
 
 #define DETECT_SCALE 1
@@ -37,9 +37,9 @@ using namespace cv;
 using namespace cv::gpu;
 
 const double CAM_BRIGHT[] = {
-		0.4,
-		0.4,
-		0.6
+		0.3,
+		0.3,
+		0.5
 };
 
 // HaarCascade 경로명 지정

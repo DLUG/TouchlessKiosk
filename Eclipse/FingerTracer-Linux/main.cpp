@@ -53,6 +53,7 @@ int main(){
 			return -1;
 		} else {
 			cam[i].set(CV_CAP_PROP_BRIGHTNESS, CAM_BRIGHT[i]);
+			cam[i].set(CV_CAP_PROP_CONTRAST, 0);
 			cam[i].set(CV_CAP_PROP_GAIN, 0);
 			cam[i].set(CV_CAP_PROP_EXPOSURE, 1);
 			if(i == 2){
@@ -73,7 +74,7 @@ int main(){
 			maskWinName[5] = 0;
 
 			cvNamedWindow(resultWinName, 1);
-			cvNamedWindow(maskWinName, 1);
+//			cvNamedWindow(maskWinName, 1);
 		}
 		sleep(1);
 	}
@@ -113,6 +114,7 @@ int main(){
 //			bg_img_gpu[i].download(bg_img[i]);
 
 
+/*
 			if(i == 0){
 				gpu::rotate(orig_img_gpu[i], rotate_img_gpu[i], sz, -90, CAM_HEIGHT, 0);
 			}else if(i == 1){
@@ -120,7 +122,9 @@ int main(){
 			}else {
 				orig_img_gpu[i].copyTo(rotate_img_gpu[i]);
 			}
+*/
 
+			orig_img_gpu[i].copyTo(rotate_img_gpu[i]);
 
 			rotate_img_gpu[i].download(rotate_img[i]);
 			rotate_img[i].copyTo(dst_img[i]);
@@ -129,7 +133,7 @@ int main(){
 //				if(i != 2){
 				if(false){
 					remove_bg_gpu(rotate_img[i], bg_img[i], bgremoved_img[i]);
-					imshow(maskWinName, bgremoved_img[i]);
+//					imshow(maskWinName, bgremoved_img[i]);
 				}else
 					rotate_img[i].copyTo(bgremoved_img[i]);
 
@@ -182,9 +186,9 @@ int main(){
 			}
 
 			if(captured_objects[0].onoff && captured_objects[1].onoff){
-				real_objects[1].x = (captured_objects[1].x - 40) * SCREEN_WIDTH / 150;
+				real_objects[1].x = ((captured_objects[1].x + captured_objects[1].x)/2);// - 40) * SCREEN_WIDTH / 150;
 				real_objects[1].z = captured_objects[1].y;
-				real_objects[1].y = ((320 - captured_objects[1].x) + captured_objects[0].x - 280) * SCREEN_HEIGHT / 80;
+				real_objects[1].y = ((320 - captured_objects[1].x) + captured_objects[0].x);// - 280) * SCREEN_HEIGHT / 80;
 				mouse_handler_object.set_point(SCREEN_WIDTH - real_objects[1].x, SCREEN_HEIGHT - real_objects[1].y);
 			}
 
