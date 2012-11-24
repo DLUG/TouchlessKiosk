@@ -13,3 +13,12 @@ If you stand in front of Kiosk, Kiosk will show first page and ask you about you
 Prototype Video : http://youtu.be/zZtGsasfYDs
 
 Final work Video : http://youtu.be/EhjqFlLbHu8
+
+============
+
+It contains two Eclipse Projects.
+
+============
+Dankook Linux User Group
+http://www.dlug.org
+http://facebook.com/dlug.page
