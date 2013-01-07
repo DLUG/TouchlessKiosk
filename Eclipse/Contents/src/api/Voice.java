@@ -48,7 +48,8 @@ public class Voice extends HttpServlet {
 		String target = "";
 		String forTTS = "";
 		int voicetime = 0;
-		
+		sess.setAttribute(VOICE_SUCCESS, true);
+		sess.setAttribute(VOICE_COMMAND, "");
 		if(request.getParameter("mode").equals("check_voice")) {
 			sess.setAttribute(VOICE_SUCCESS, false);
 			sess.removeAttribute(VOICE_COMMAND);
