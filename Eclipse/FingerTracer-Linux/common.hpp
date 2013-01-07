@@ -19,7 +19,7 @@
 #define FALSE 0
 #define DEBUG
 #define DEBUG_SCREEN
-//#define CLICK_ENABLE
+#define CLICK_ENABLE
 //#define CAM_BRIGHT 0.4
 
 #define DETECT_SCALE 1
@@ -50,8 +50,10 @@ const String HAAR_DATA[] = {
 //		"haar_data/point_24.xml",
 //		"haar_data/right_result_2.xml",
 //		"haar_data/right_result_2.xml",
-		"haar_data/capston3_convert_result.xml",
-		"haar_data/capston3_convert_result.xml",
+//		"haar_data/capston3_convert_result.xml",
+//		"haar_data/capston3_convert_result.xml",
+		"haar_data/kintex_convert_result_2.xml",
+		"haar_data/kintex_convert_result_2.xml",
 		"/usr/local/share/OpenCV/haarcascades/haarcascade_frontalface_alt.xml"
 };
 

@@ -186,25 +186,26 @@ int main(){
 			}
 
 			if(captured_objects[0].onoff && captured_objects[1].onoff){
-				real_objects[1].x = ((captured_objects[1].x + captured_objects[1].x)/2);// - 40) * SCREEN_WIDTH / 150;
 				real_objects[1].z = captured_objects[1].y;
-				real_objects[1].y = ((320 - captured_objects[1].x) + captured_objects[0].x);// - 280) * SCREEN_HEIGHT / 80;
+				real_objects[1].y = ((320 - captured_objects[1].x) + captured_objects[0].x - 250) * SCREEN_HEIGHT / 120;
+
+				real_objects[1].x = ((captured_objects[1].x + captured_objects[1].x)/2 - 150) * SCREEN_WIDTH / 126 + ((real_objects[1].y)/2);
 				mouse_handler_object.set_point(SCREEN_WIDTH - real_objects[1].x, SCREEN_HEIGHT - real_objects[1].y);
 			}
 
 #ifdef CLICK_ENABLE
 // Click with Face
 			face_judgement_score = 0;
-			for(i = 0; i < 14; i++){
+			for(i = 0; i < 10; i++){
 				face_judgement[i] = face_judgement[i + 1];
 				face_judgement_score += face_judgement[i];
 			}
-			face_judgement[14] = captured_objects[2].onoff;
+			face_judgement[10] = captured_objects[2].onoff;
 			cout << "ttt " <<face_judgement_score << endl;
-			if(face_judgement_score > 10){
+			if(face_judgement_score > 7){
 				if(face_status[0] != 1 && face_status[1] != 1){
 					face_status[1] = 1;
-					keyboard_handler_object.click(XK_H);
+//					keyboard_handler_object.click(XK_H);
 				} else
 					face_status[1] = 1;
 				face_status[0] = face_status[1];
@@ -217,14 +218,16 @@ int main(){
 
 // Click with Hand
 			hand_judgement_score = 0;
-			for(i = 0; i < 10; i++){
+			for(i = 0; i < 14; i++){
 				hand_judgement[i] = hand_judgement[i + 1];
 				hand_judgement_score += hand_judgement[i];
 			}
-			hand_judgement[10] = captured_objects[0].onoff || captured_objects[1].onoff;
+			hand_judgement[14] = captured_objects[0].onoff || captured_objects[1].onoff;
 
-			if(hand_judgement_score > 7){
+			if(hand_judgement_score > 10){
 				if(click_status[0] != 1 && click_status[1] != 1){
+					click_status[1] = 1;
+
 					mouse_handler_object.click();
 				} else
 					click_status[1] = 1;
