@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,24 +45,96 @@ public class Voice extends HttpServlet {
 //		out = response.getWriter();
 		HttpSession sess = request.getSession();
 		
-		if(request.getParameter("mode").equals("add_voice")) {
+		String target = "";
+		String forTTS = "";
+		int voicetime = 0;
+		
+		if(request.getParameter("mode").equals("check_voice")) {
 			sess.setAttribute(VOICE_SUCCESS, false);
 			sess.removeAttribute(VOICE_COMMAND);
-			sess.setAttribute(VOICE_COMMAND, request.getParameter("value"));
+			String value = request.getParameter("value");
+			sess.setAttribute(VOICE_COMMAND, value);
+			
+			oDb.clear();
+			oDb.setTable("command_list");
+			oDb.addField("weight");
+			oDb.setPostfixQuery("GROUP BY weight ORDER BY weight");
+
+			List<Map<String, String>> weightList = oDb.getData();
+			
+			for(Map<String, String> weightItem: weightList){
+				oDb.clear();
+				oDb.setTable("command_list");
+				oDb.addField("child");
+				oDb.addField("command");
+				oDb.addField("target");
+				oDb.addFilter("weight", weightItem.get("weight"));
+				List<Map<String, String>> queryList = oDb.getData();
+				
+				for(Map<String, String> queryItem: queryList){
+					if(value.indexOf(queryItem.get("command")) != -1){
+						if(queryItem.get("child") == null){
+							target = queryItem.get("target");
+							forTTS = "OK";
+							voicetime = 1;
+							sess.setAttribute(VOICE_SUCCESS, true);
+						} else {
+							oDb.clear();
+							oDb.setTable("command_list");
+							oDb.addField("command");
+							oDb.addField("target");
+							oDb.addFilter("parent", queryItem.get("child"));
+							List<Map<String, String>> childList = oDb.getData();
+							
+							for(Map<String, String> childItem: childList){
+								if(value.indexOf(childItem.get("command")) != -1){
+									target = childItem.get("target");
+									forTTS = "OK";
+									voicetime = 1;
+									sess.setAttribute(VOICE_SUCCESS, true);
+								}
+							}
+							if(target.equals("")){
+								target = queryItem.get("target");
+								if(queryItem.get("child").equals("office") 
+										|| queryItem.get("child").equals("lab")
+										){
+									forTTS = "I don't understand where you want to go";
+									voicetime = 3;
+								}
+								if(queryItem.get("child").equals("cafeteria")){
+									forTTS = "I don't understand where you want to eat";
+									voicetime = 3;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			if(target.equals("")){
+				target = "./menu.html";
+				forTTS = "I don't understand your command.";
+				voicetime = 3;
+			}
+
+			String result = "";
+			result += "{\"target\": \"" + target + "\", \"forTTS\": \"" + forTTS + "\", \"voicetime\": " + voicetime + "}";
+			
+			ServletOutputStream out = response.getOutputStream();
+			out.print(result);
+			
 			System.out.println(sess.getAttribute(VOICE_COMMAND));
 			
-		} else if(request.getParameter("mode").equals("add_usermenu")) {
+		} else if(request.getParameter("mode").equals("addlog")) {
 			System.out.println(request.getParameter("value"));
 			if(!(boolean)sess.getAttribute(VOICE_SUCCESS)) {
 				oDb.clear();
-				oDb.addTable("search");
-				oDb.setInsert("voiceresult", (String)sess.getAttribute(VOICE_COMMAND));
-				oDb.setInsert("lastclick", request.getParameter("value"));
+				oDb.setTable("error_log");
+				oDb.setInsert("voice_text", (String)sess.getAttribute(VOICE_COMMAND));
+				oDb.setInsert("selected_page", request.getParameter("value"));
 				oDb.putData();
 			}
-		} else if(request.getParameter("mode").equals("voice_success")) {
-			sess.setAttribute(VOICE_SUCCESS, true);
-			System.out.println("Voice Success");
 		}
 	}
 

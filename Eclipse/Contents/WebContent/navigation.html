@@ -5,27 +5,6 @@
 	<link href="./css/dot-luv/jquery-ui-1.9.0.custom.css" rel="stylesheet" />
 	<link rel="stylesheet" type="text/css" href="./css/styleShare.css" />
 	<script src="./js/jquery-1.8.2.js" type="text/javascript"></script>
-	<script type="text/javascript">
-			var intervalId;
-			$(document).ready(function(){
-				settingTimeout();
-			});
-			function settingTimeout() {
-				intervalId = setTimeout(reset, 1000 * 60 * 10);
-			}
-			function reset() {
-				location.href = "/Contents/ads.html";
-			}
-			function resetTimeout() {
-				clearTimeout(intervalId - 1);
-				clearTimeout(intervalId);
-			}
-			function backButton() {
-				resetTimeout();
-				settingTimeout();
-				location.href = "/Contents/main.html";
-			}
-		</script>
 		<script src="./js/common.js" type="text/javascript"></script>
 </head>
 
@@ -46,8 +25,27 @@
 					title: "Video will be closed after played.",
 					width: 742
 				});
+				
+				var thisurl = location.href;
+				if(thisurl.indexOf("#") == -1){
+					$("#tts").append("<iframe src=\"http://translate.google.com/translate_tts?tl=en&q=Where do you want to go?\" width=\"0\" height=\"0\"></iframe>");
+				} else {
+					var videonumber = thisurl.substring(thisurl.indexOf("#") + 1);
+					movieDialog($("#dialog-link" + videonumber));
+					$("#tts").append("<iframe src=\"http://translate.google.com/translate_tts?tl=en&q=This is way to go to " + $("#dialog-link" + videonumber).attr("name") + "\" width=\"0\" height=\"0\"></iframe>");
+				}
 			});
 			
+			function moveDialogClick(tmpStr){
+				$.ajax({
+					  type: "GET",
+					  url: "./api/voice",
+					  data: { mode: "addlog", value: $(tmpStr).attr("name") }
+				});	
+				
+				movieDialog(tmpStr);
+			}
+		
 			function movieDialog(str) {
 				resetTimeout();
 				settingTimeout();
@@ -55,12 +53,6 @@
 				$( "#dialog" ).dialog( "open" );
 				event.preventDefault();
 
-				$.ajax({
-					  type: "GET",
-					  url: "/Contents/api/voice",
-					  data: { mode: "add_usermenu", value: $(str).attr("name") }
-					});
-				
 				$("#movie_src").attr("src", $(str).attr("value"));
 				document.getElementById("a_video").load();
 				document.getElementById("a_video").play();
@@ -87,28 +79,35 @@
 			</div>
 			<div class="content">
 				<div class="locationLine">
-					<div class="locationMenu shadow" onClick="movieDialog(this)"
-						id="dialog-link" value="./movie/Sequence_02.mp4" name="Dept. of Industrial Engineering office">Dept. of Industrial Engineering office</div>
+					<div class="locationMenu shadow" onClick="movieDialogClick(this)"
+						id="dialog-link1" value="./movie/Sequence_02.mp4" name="Dept. of Industrial Engineering office">
+						<div class="locationMenuText">Dept. of Industrial Engineering office</div>
+					</div>
 					<div class="locationEmpty">&nbsp;</div>
-					<div class="locationMenu shadow" onClick="movieDialog(this)"
-						id="dialog-link2" value="./movie/Sequence_01.mp4" name="Dept. of Electronic Engineering office">Dept. of Electronic Engineering office</div>
+					<div class="locationMenu shadow" onClick="movieDialogClick(this)"
+						id="dialog-link2" value="./movie/Sequence_01.mp4" name="Dept. of Electronic Engineering office">
+						<div class="locationMenuText">Dept. of Electronic Engineering office</div>
+					</div>
 					<div class="locationEmpty">&nbsp;</div>
-					<div class="locationMenu shadow" onClick="movieDialog(this)"
-						id="dialog-link3" value="./movie/Sequence_03.mp4" name="The Dean of the School of Engineering">The Dean of the School of Engineering</div>
+					<div class="locationMenu shadow" onClick="movieDialogClick(this)"
+						id="dialog-link3" value="./movie/Sequence_03.mp4" name="The Dean of the School of Engineering">
+						<div class="locationMenuText">The Dean of the School of Engineering</div>
+					</div>
 					<div class="locationEmpty">&nbsp;</div>
-					<div class="locationMenu shadow" onClick="movieDialog(this)"
+					<div class="locationMenu shadow" onClick="movieDialogClick(this)"
 						id="dialog-link4" value="./movie/Sequence_04.mp4" name="Administration Team for College of Engineering">
-						Administration Team for College of Engineering</div>
+						<div class="locationMenuText">Administration Team for College of Engineering</div>
+					</div>
 					<div class="locationEmpty">&nbsp;</div>
-					<div class="locationMenu shadow" onClick="movieDialog(this)"
+					<div class="locationMenu shadow" onClick="movieDialogClick(this)"
 						id="dialog-link5" value="./movie/Sequence_05.mp4" name="Innovation Cetner for Engineering Education">
-						Innovation Cetner for Engineering Education</div>
-				</div>
-				<div class="both">&nbsp;</div>
-				<div class="locationLine">
-					<div class="locationMenu shadow" onClick="movieDialog(this)"
-						id="dialog-link7" value="./movie/Sequence_07.mp4" name="Lab. for
-						Department of Computer Science">Lab. for Department of Computer Science</div>
+						<div class="locationMenuText">Innovation Cetner for Engineering Education</div>
+					</div>
+					<div class="locationEmpty">&nbsp;</div>
+					<div class="locationMenu shadow" onClick="movieDialogClick(this)"
+						id="dialog-link6" value="./movie/Sequence_07.mp4" name="Lab. for Department of Computer Science">
+						<div class="locationMenuText">Lab. for Department of Computer Science</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -119,8 +118,7 @@
 			<source id="movie_src" type="video/mp4" src="./movie/Sequence_01.mp4" />
 		</video>
 	</div>
-	<div style="clear:both;" width="0" height="0">
-		<iframe src="http://translate.google.com/translate_tts?tl=en&q=Where do you want to go?" width="0" height="0"></iframe>
+	<div id="tts" style="clear:both;" width="0" height="0">
 	</div>
 </body>
 </html>

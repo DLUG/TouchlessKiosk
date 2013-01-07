@@ -1,8 +1,15 @@
 package api;
 
-import java.io.UnsupportedEncodingException;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 
 public class Db {
 	Connection conn;
@@ -13,19 +20,19 @@ public class Db {
 	final String SERVER = "localhost";
 	final String DBNAME = "kiosk";
 	
-	private HashMap<String, String> insertList = null;
-	private ArrayList<String> fieldList = null;
-	private HashMap<String, String> filterList = null;
-	private ArrayList<String> joinList = null;
-	private ArrayList<String> tableList = null;
+	private Map<String, String> insertList = null;
+	private List<String> fieldList = null;
+	private Map<String, String> filterList = null;
+	private List<String> joinList = null;
+	private List<String> tableList = null;
 
-	private String tableName = "";
+	private String postfixQuery = "";
 	
 	public void addField(String value){
 		fieldList.add(value);
 	}
 	
-	public void addTable(String name){
+	public void setTable(String name){
 		tableList.add(name);
 	}
 	
@@ -41,6 +48,10 @@ public class Db {
 		joinList.add(leftValue);
 		joinList.add(rightValue);
 	}
+	
+	public void setPostfixQuery(String postfix){
+		postfixQuery = postfix;
+	}
 
 	public void clear(){
 		insertList = new HashMap<String, String>();
@@ -48,6 +59,7 @@ public class Db {
 		filterList = new HashMap<String, String>();
 		joinList = new ArrayList<String>();
 		tableList = new ArrayList<String>();
+		postfixQuery = "";
 	}
 	
 	void Connection(){
@@ -68,9 +80,9 @@ public class Db {
 		Connection();
 	}
 
-	public ArrayList<HashMap<String, String>> getData(){						// New Version
+	public List<Map<String, String>> getData(){						// New Version
 		
-		ArrayList<HashMap<String, String>> tmpResult = new ArrayList<HashMap<String, String>>();
+		List<Map<String, String>> tmpResult = new ArrayList<Map<String, String>>();
 		
 		try {
 			stmt = conn.createStatement();
@@ -99,7 +111,7 @@ public class Db {
 				tmpQuery = tmpQuery.substring(0, tmpQuery.length() - 4);
 			}
 
-			tmpQuery += ";";
+			tmpQuery += " " + postfixQuery + ";";
 									
 			
 			rs = stmt.executeQuery(tmpQuery);
@@ -107,7 +119,7 @@ public class Db {
 			rs.beforeFirst();
 
 			while(rs.next()){
-				HashMap<String, String>tmpItem = new HashMap<String, String>();
+				Map<String, String>tmpItem = new HashMap<String, String>();
 				for(String fieldName : fieldList){
 					tmpItem.put(fieldName, rs.getString(fieldName));
 				}
@@ -125,6 +137,8 @@ public class Db {
 		}
 		return tmpResult;
 	}
+	
+	
 	
 	public int deleteData(){					// New Version
 		int queryResult = 0;

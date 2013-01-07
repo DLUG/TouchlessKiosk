@@ -7,6 +7,14 @@
 		<script src="./js/jquery-1.8.2.js" type="text/javascript"></script>
 		<script src="./js/common.js" type="text/javascript"></script>
 <script type="text/javascript">
+$(document).ready(function(){
+	setTimeout(clickVoice, 1000 * 10);
+});
+
+function clickVoice(){
+	$("#voice_recog").click();
+}
+
 	function voiceSuccess(url) {
 		$.ajax({
 			  type: "GET",
@@ -16,60 +24,45 @@
 				location.href = url;
 			});
 	}
+	
 	function getspeech(speech) {
-	switch(speech.value) {
-		case "menu":
-			voiceSuccess("./menu.html");
-			break;
-		case "navigation":
-			voiceSuccess("./navigation.html");
-			break;
-		case "performance":
-			voiceSuccess("./performance.html");
-			break;
-		case "help":
-			voiceSuccess("./help.html");
-			break;
-		default:
-			$.ajax({
-				  type: "GET",
-				  url: "/Contents/api/voice",
-				  data: { mode: "add_voice", value: speech.value }
-				}).done(function(){
-					location.href = "main.html";
-				});
-			break;
+		$.ajax({
+		  type: "GET",
+		  url: "/Contents/api/voice",
+		  data: { mode: "check_voice", value: speech.value }
+		}).done(function(data){
+			after_check(data);
+		});
 	}
-}
-	var intervalId;
-	$(document).ready(function(){
-		settingTimeout();
-	});
-	function settingTimeout() {
-		intervalId = setTimeout(reset, 1000 * 60 * 2);
+	var voice_result;
+	function after_check(result){
+		voice_result = jQuery.parseJSON(result);
+		$("#tts").append("<iframe src=\"http://translate.google.com/translate_tts?tl=en&q=" + voice_result.forTTS + "\"></iframe>");
+		setTimeout(moving, voice_result.voicetime * 1000);
 	}
-	function reset() {
-		location.href = "/Contents/ads.html";
-	}
-	function resetTimeout() {
-		clearTimeout(intervalId - 1);
-		clearTimeout(intervalId);
+	
+	function moving(){
+		location.href = voice_result.target;
 	}
 </script>
+<script src="./js/common.js"></script>
 </head>
 <body style="background-color: #f0f0f0;">
 	<div class="container">
 		<div class="mainTitle">&nbsp;</div>
 		<div class="mainContainer" style="height:596px;">
 			<div class="speech_div">
-				<input class="mike" x-webkit-speech onwebkitspeechchange="javascript:getspeech(this)" />
+				<input id="voice_recog" class="mike" x-webkit-speech onwebkitspeechchange="javascript:getspeech(this)" />
 			</div>
 			<div class="mainBody shadow white"><img src="./res/first.png" /></div>
 		</div>
 		<div class="mainBottom">&nbsp;</div>
 	</div>
-	<div style="display:none">
+	<div style="display:none" id="tts">
+		<!-- 
 		<iframe src="http://translate.google.com/translate_tts?tl=en&q=What can I do for you? After click microphone icon. Please say what you want"></iframe>
+		-->
+		<iframe src="http://translate.google.com/translate_tts?tl=en&q=What can I do for you? Please say what you want"></iframe>
 	</div>
 </body>
 </html>

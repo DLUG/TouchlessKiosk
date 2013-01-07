@@ -11,21 +11,7 @@
 		<script src="js/jquery.mobile-1.2.0.min.js"></script>
 </head>
 <body>
-	<script type="text/javascript">	
-	var intervalId;
-	$(document).ready(function(){
-		settingTimeout();
-	});
-	function settingTimeout() {
-		intervalId = setTimeout(reset, 1000 * 60 * 2);
-	}
-	function reset() {
-		location.href = "/Contents/ads.html";
-	}
-	function resetTimeout() {
-		clearTimeout(intervalId - 1);
-		clearTimeout(intervalId);
-	}
+<script>	
 	function backButton() {
 		resetTimeout();
 		settingTimeout();

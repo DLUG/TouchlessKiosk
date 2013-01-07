@@ -1,16 +1,25 @@
-﻿.locationEmpty { width: 15px; display: table-cell; }
+﻿.locationEmpty { 
+	float: left;
+}
 
 .locationMenu {
-	display:table-cell;
-	width: 182px;
-	height: 104px;
-	margin-left: 24px;
+	width: 290px;
+	height: 150px;
 	background: #FFFFFF;
 	text-align: center;
 	vertical-align: middle;
-	font-size: 20px;
 	cursor: pointer;
+	float: left;
+	margin: 10px;
+	border: solid 1px #AAAAAA;
 }
-.locationLine {
+
+.locationMenuText{
+	height: 60px;
+	width: 270px;
+	font-size: 20px;
+	margin: 45px auto;
+}
+.locationLine1 {
 	display:table-cell;
 }

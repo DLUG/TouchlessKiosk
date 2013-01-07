@@ -3,27 +3,6 @@
 	<meta charset="utf-8">
 	<head>
 		<link rel="stylesheet" type="text/css" href="./css/styleShare.css" />
-		<script type="text/javascript">
-			var intervalId;
-			$(document).ready(function(){
-				settingTimeout();
-			});
-			function settingTimeout() {
-				intervalId = setTimeout(reset, 1000 * 60 * 10);
-			}
-			function reset() {
-				location.href = "/Contents/ads.html";
-			}
-			function resetTimeout() {
-				clearTimeout(intervalId - 1);
-				clearTimeout(intervalId);
-			}
-			function backButton() {
-				resetTimeout();
-				settingTimeout();
-				location.href = "/Contents/main.html";
-			}
-		</script>
 		<script src="./js/common.js" type="text/javascript"></script>
 </head>
 
@@ -33,6 +12,12 @@
 		resetTimeout();
 		settingTimeout();
 	});
+	
+	$.ajax({
+		  type: "GET",
+		  url: "./api/voice",
+		  data: { mode: "add_usermenu", value: "performance" }
+		});
 	</script>
 	<link rel="stylesheet" type="text/css" href="./css/styleShareTable.css" />
 	<div class="container">
