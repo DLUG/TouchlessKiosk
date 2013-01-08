@@ -28,7 +28,7 @@ function clickVoice(){
 	function getspeech(speech) {
 		$.ajax({
 		  type: "GET",
-		  url: "/Contents/api/voice",
+		  url: "./api/voice",
 		  data: { mode: "check_voice", value: speech.value }
 		}).done(function(data){
 			after_check(data);

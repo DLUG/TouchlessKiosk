@@ -77,7 +77,7 @@ public class Voice extends HttpServlet {
 						if(queryItem.get("child") == null){
 							target = queryItem.get("target");
 							forTTS = "OK";
-							voicetime = 1;
+							voicetime = 2;
 							sess.setAttribute(VOICE_SUCCESS, true);
 						} else {
 							oDb.clear();
@@ -91,10 +91,11 @@ public class Voice extends HttpServlet {
 								if(value.indexOf(childItem.get("command")) != -1){
 									target = childItem.get("target");
 									forTTS = "OK";
-									voicetime = 1;
+									voicetime = 2;
 									sess.setAttribute(VOICE_SUCCESS, true);
 								}
 							}
+							
 							if(target.equals("")){
 								target = queryItem.get("target");
 								if(queryItem.get("child").equals("office") 
@@ -114,7 +115,7 @@ public class Voice extends HttpServlet {
 			}
 			
 			if(target.equals("")){
-				target = "./menu.html";
+				target = "./main.html";
 				forTTS = "I don't understand your command.";
 				voicetime = 3;
 			}
