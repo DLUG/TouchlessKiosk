@@ -16,7 +16,7 @@ function settingTimeout() {
 	intervalId = setTimeout(reset, 1000 * 60 * 10);
 }
 function reset() {
-	location.href = "/Contents/ads.html";
+	location.href = "./ads.html";
 }
 function resetTimeout() {
 	clearTimeout(intervalId - 1);
@@ -25,5 +25,5 @@ function resetTimeout() {
 function backButton() {
 	resetTimeout();
 	settingTimeout();
-	location.href = "/Contents/main.html";
+	location.href = "./main.html";
 }

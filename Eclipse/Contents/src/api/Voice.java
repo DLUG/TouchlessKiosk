@@ -100,13 +100,16 @@ public class Voice extends HttpServlet {
 								target = queryItem.get("target");
 								if(queryItem.get("child").equals("office") 
 										|| queryItem.get("child").equals("lab")
+										|| queryItem.get("child").equals("where")
 										){
 									forTTS = "I don't understand where you want to go";
-									voicetime = 3;
-								}
-								if(queryItem.get("child").equals("cafeteria")){
+									voicetime = 4;
+								}else if(queryItem.get("child").equals("cafeteria")){
 									forTTS = "I don't understand where you want to eat";
-									voicetime = 3;
+									voicetime = 4;
+								} else {
+									forTTS = "I don't understand your command.";
+									voicetime = 4;
 								}
 							}
 						}

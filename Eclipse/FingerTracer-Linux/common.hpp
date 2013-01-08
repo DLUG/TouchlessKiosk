@@ -8,12 +8,12 @@
 #ifndef COMMON_HPP_
 #define COMMON_HPP_
 
-#define SCREEN_WIDTH 1600
-#define SCREEN_HEIGHT 1200
+#define SCREEN_WIDTH 1280
+#define SCREEN_HEIGHT 1024
 
 #define CAM_NUM 3
-#define CAM_WIDTH 320
-#define CAM_HEIGHT 240
+#define CAM_WIDTH 480
+#define CAM_HEIGHT 320
 #define OBJECT_NUM 2
 #define TRUE 1
 #define FALSE 0
@@ -37,8 +37,8 @@ using namespace cv;
 using namespace cv::gpu;
 
 const double CAM_BRIGHT[] = {
-		0.3,
-		0.3,
+		0.4,
+		0.4,
 		0.5
 };
 

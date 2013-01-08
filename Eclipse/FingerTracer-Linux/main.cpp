@@ -34,6 +34,8 @@ int main(){
 	int hand_judgement_score = 0;
 	int click_status[2] = {0, 0};
 
+	int voice_click = 0;
+
 	for(i = 0; i < 30; i++){
 		hand_judgement[i] = 0;
 		face_judgement[i] = 0;
@@ -196,22 +198,29 @@ int main(){
 #ifdef CLICK_ENABLE
 // Click with Face
 			face_judgement_score = 0;
-			for(i = 0; i < 10; i++){
+			for(i = 0; i < 14; i++){
 				face_judgement[i] = face_judgement[i + 1];
 				face_judgement_score += face_judgement[i];
 			}
 			face_judgement[10] = captured_objects[2].onoff;
-			cout << "ttt " <<face_judgement_score << endl;
+			cout << "ttt " << face_judgement_score << endl;
 			if(face_judgement_score > 7){
 				if(face_status[0] != 1 && face_status[1] != 1){
 					face_status[1] = 1;
-//					keyboard_handler_object.click(XK_H);
+					keyboard_handler_object.click(XK_H);
+					voice_click = 1;
 				} else
 					face_status[1] = 1;
 				face_status[0] = face_status[1];
 			} else {
 				face_status[1] = 0;
 				face_status[0] = face_status[1];
+			}
+
+			if(face_judgement_score >= 13 && voice_click == 1){
+				mouse_handler_object.set_point(1080,320);
+				mouse_handler_object.click();
+				voice_click = 0;
 			}
 
 

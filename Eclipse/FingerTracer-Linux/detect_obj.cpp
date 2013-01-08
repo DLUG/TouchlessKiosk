@@ -151,7 +151,7 @@ void detect_obj_gpu(GpuMat& orig_gpumat, Mat& result_mat, object_gpu_t objects[]
 		objects[i].cascade.visualizeInPlace = true;
 		objects[i].cascade.findLargestObject = false;
 
-		detected_objects_num[i] = objects[i].cascade.detectMultiScale( small_gray_gpumat, objects_buf[i], 1.1, 1, Size(50, 50));
+		detected_objects_num[i] = objects[i].cascade.detectMultiScale( small_gray_gpumat, objects_buf[i], 1.1, 1, Size(20, 20));
 
 		objects_buf[i].colRange(0, detected_objects_num[i]).download(objects_downloaded[i]);
 
