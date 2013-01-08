@@ -18,7 +18,7 @@ function clickVoice(){
 	function voiceSuccess(url) {
 		$.ajax({
 			  type: "GET",
-			  url: "/Contents/api/voice",
+			  url: "./api/voice",
 			  data: { mode: "voice_success" }
 			}).done(function(){
 				location.href = url;
